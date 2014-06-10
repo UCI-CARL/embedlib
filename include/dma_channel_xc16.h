@@ -1,6 +1,6 @@
 /* -*- mode: C; tab-width: 4; -*- */
 /**
- * @file dma_channel.h
+ * @file dma_channel_xc16.h
  *
  * @brief This module contains code to control a single DMA channel on a dsPIC33F chip.
  *
@@ -16,8 +16,10 @@
  */
 
 // Include guard
-#ifndef _DMA_CHANNEL_H
-#define _DMA_CHANNEL_H
+#ifndef _DMA_CHANNEL_XC16_H
+#define _DMA_CHANNEL_XC16_H
+
+#include <stdbool.h>
 
 /**
  * @defgroup DMAChannel DMA Channel
@@ -44,25 +46,25 @@
  *
  * @public
  */
-struct dma_attr_s
+typedef struct dma_attr_s
 {
     /**
-     * @brief DMA channel control settings.
+     * @brief DMA channel configuration.
      *
      * @details These settings control how the DMA channel operates.
      */
-    unsigned int control_settings;
+    unsigned int config;
 
     /**
      * @brief The IRQ which triggers a DMA transfer.
      */
-    unsigned int irq;
+    dma_irq_t irq;
 
     /**
      * @brief The peripheral address to either read from or write to.
      */
-    volatile unsigned int peripheral_address;
-};
+    dma_peripheral_t peripheral_address;
+} dma_attr_t;
 
 /**
  * @brief A struct which represents a specific instance of a DMA channel.
@@ -78,29 +80,30 @@ struct dma_attr_s
 typedef struct dma_channel_s
 {
     /**
-     * @brief The base hardware address of the DMA channel.
+     * @brief The DMA channel number.
      *
-     * @details This is the address from which all SFRs are referenced. It should be set to the
-     * address of DMAxCON for the particular DMA channel which is to be described.
+     * @details This is the channel number from 0-7 of the DMA channel. This is used to help map
+     * the correct special function registers and to return the correct data from global DMA
+     * registers (e.g. DMACS0).
      *
-     * This value should only be set once, during instantiation.
+     * This value should only be set once, during instantiation of the dma_channel_t object.
      */
-    volatile unsigned int * const base_address;
+    const unsigned int channel_number;
 
     /**
-     * @brief A pointer to a buffer in DMA DPSRAM.
+     * @brief A pointer to buffer A in DMA DPSRAM.
      *
-     * @details This is a pointer to the buffer in DMA DPSRAM which should be used for transfers.
-     * Any transfers to or from a peripheral will use this buffer.
+     * @details This is a pointer to buffer A in DMA DPSRAM. This buffer is used when ping-pong
+     * mode is disabled and as buffer A when ping-pong mode is disabled.
      *
-     * This value should only be set once, during instantiation. It is assumed this value will
+     * This pointer may only be set once, during instantiation. It is assumed this value will
      * point to a statically allocated array in DMA DPSRAM. If the array is not in DPSRAM then DMA
      * transfers will not succeed.
      */
-    volatile unsigned int * const buffer;
+    volatile unsigned int * const buffer_a;
 
     /**
-     * @brief The size of the buffer in DMA DPSRAM.
+     * @brief The size of buffer A in DMA DPSRAM.
      *
      * @details This is the size of the array pointed to by @em buffer. This value may not extend
      * the array past the bounds of DPSRAM or else any DMA transfers to addresses outside the DMA
@@ -108,8 +111,32 @@ typedef struct dma_channel_s
      *
      * This value should only be set once, during instantiation.
      */
-    const unsigned int buffer_size;
+    const unsigned int buffer_a_size;
 
+    /**
+     * @brief A pointer to buffer B in DMA DPSRAM.
+     *
+     * @details This is a pointer to buffer B in DMA DPSRAM which should be used for transfers.
+     * This buffer should only be used if the module is configured to use Ping-Ping mode.
+     *
+     * This pointer may only be set once, during instantiation. It is assumed this value will
+     * point to a statically allocated array in DMA DPSRAM. If the array is not in DPSRAM then DMA
+     * transfers will not succeed. If buffer B is unused this value should be NULL.
+     */
+    volatile unsigned int * const buffer_b;
+
+    /**
+     * @brief The size of buffer B in DMA DPSRAM.
+     *
+     * @details This is the size of the array pointed to by @em buffer_b. This value may not extend
+     * the array past the bounds of DPSRAM or else any DMA transfers to addresses outside the DMA
+     * space will fail.
+     *
+     * This value should only be set once, during initialization, and should be the true size of
+     * the statically allocated array in DMA DPSRAM. If buffer B is unused this value should be 0.
+     */
+    const unsigned int buffer_b_size;
+    
     /**
      * @brief This holds private data specific to this channel.
      *
@@ -128,18 +155,19 @@ typedef struct dma_channel_s
  *
  * @public
  */
-enum dma_error_e
+typedef enum dma_error_e
 {
-    DMA_E_NONE    = 0,     /**< No error, successful return */
-    DMA_E_CHANNEL = -1,    /**< Invalid DMA channel */
-    DMA_E_ALLOC   = -2,    /**< Error during dynamic memory allocation */
-    DMA_E_INPUT   = -3,    /**< Invalid input to function */
-    DMA_E_OUTPUT  = -4,    /**< Invalid output pointer */
-    DMA_E_UNKNOWN = 0xFFFF /**< Unknown error */
-};
+    DMA_E_NONE    = 0,      /**< No error, successful return */
+    DMA_E_CHANNEL = -1,     /**< Invalid DMA channel */
+    DMA_E_ALLOC   = -2,     /**< Error during dynamic memory allocation */
+    DMA_E_INPUT   = -3,     /**< Invalid input to function */
+    DMA_E_OUTPUT  = -4,     /**< Invalid output pointer */
+    DMA_E_ASSERT  = 0xEFFE, /**< Assertion failed */
+    DMA_E_UNKNOWN = 0xEFFF  /**< Unknown error */
+} dma_error_t;
 
 /**
- * @brief DMA channel control settings.
+ * @brief DMA channel configuration settings.
  *
  * @details This enumeration defines the various settings which may be used to configure how a DMA
  * channel functions. These settings are intentionally close to the hardware so that a DMA channel
@@ -156,9 +184,8 @@ enum dma_error_e
  * Group Descriptions:<br />
  * - <tt>OPMODE</tt>: Operating mode determines whether the channel will continuously transfer data
  *   or if it will stop after one block transfer.
- * - <tt>PINGPONG</tt>: Ping-Pong mode splits the DMA buffer in half and jumps between the two new
- *   buffers after each block transfer. See the #DMAModule details for more information on how
- *   Ping-Pong mode is handled.
+ * - <tt>PINGPONG</tt>: Ping-Pong mode jumps between the A and B buffers after each block transfer.
+ *   See the #DMAModule details for more information on how Ping-Pong mode is handled.
  * - <tt>ADDRMODE</tt>: Addressing mode determines how the next piece of data is selected. If
  *   register indirect addressing is used then the channel may either increment the address after
  *   a transfer (post increment) or use the same address for the next transfer (no post increment).
@@ -168,10 +195,6 @@ enum dma_error_e
  * - <tt>NULLWRITE</tt>: Null write mode causes a null data write to the peripheral upon reading
  *   from the peripheral. This is useful for peripherals such as SPI. See the hardware data sheet
  *   for more information.
- * - <tt>INT</tt>: Block transfer interrupts can be set for either half data transfer or all data
- *   transfer. If half data transfer is selected the DMA interrupt will occur after half a block is
- *   transfered (and not after a full block). If all data transfer is selected the DMA interrupt
- *   will occur after a whole block is transfered.
  * - <tt>DIR</tt>: The direction setting determines if transfers read from or write to the
  *   peripheral.
  * - <tt>DATASIZE</tt>: The data size sets the size of each transfer. Word means a full word will
@@ -182,48 +205,41 @@ enum dma_error_e
  * @see dma_attr_s
  * @public
  */
-enum dma_control_settings_e
+typedef enum dma_config_e
 {
     // Operating Mode settings
-    DMA_BITMASK_OPMODE          = 0x0001, /**< Bitmask for Operating Mode settings */
-    DMA_OPMODE_CONTINUOUS       = 0x0000, /**< Continuous operation @default */
-    DMA_OPMODE_ONESHOT          = 0x0001, /**< One-shot operation */
+    DMA_CONFIG_OPMODE_BITMASK            = 0x0001, /**< Bitmask for Operating Mode settings */
+    DMA_CONFIG_OPMODE_CONTINUOUS         = 0x0000, /**< Continuous operation @default */
+    DMA_CONFIG_OPMODE_ONESHOT            = 0x0001, /**< One-shot operation */
 
     // Ping-Pong Mode settings
-    DMA_BITMASK_PINGPONG        = 0x0002, /**< Bitmask for Ping-Pong Mode settings */
-    DMA_PINGPONG_DIS            = 0x0000, /**< Ping-Pong mode disabled @default */
-    DMA_PINGPONG_EN             = 0x0002, /**< Ping-Pong mode enabled */
+    DMA_CONFIG_PINGPONG_BITMASK          = 0x0002, /**< Bitmask for Ping-Pong Mode settings */
+    DMA_CONFIG_PINGPONG_DIS              = 0x0000, /**< Ping-Pong mode disabled @default */
+    DMA_CONFIG_PINGPONG_EN               = 0x0002, /**< Ping-Pong mode enabled */
 
     // Addressing Mode settings
-    DMA_BITMASK_ADDRMODE        = 0x000C, /**< Bitmask for Addressing Mode settings */
-    DMA_ADDRMODE_REGISTER_IND   = 0x0000, /**< Register indirect addressing mode @default */
-    DMA_ADDRMODE_POSTINC_EN     = 0x0000, /**< Enable Post-increment mode (Register indirect
-                                           * addressing mode only) @default */
-    DMA_ADDRMODE_POSTINC_DIS    = 0x0004, /**< Disable Post-increment mode (Register indirect
-                                           * addressing mode only) */
-    DMA_ADDRMODE_PERIPHERAL_IND = 0x0008, /**< Peripheral indirect addressing mode (will ignore any
-                                           * Post-increment settings) */
+    DMA_CONFIG_ADDRMODE_BITMASK          = 0x000C, /**< Bitmask for Addressing Mode settings */
+    DMA_CONFIG_ADDRMODE_REGIND_POSTINC   = 0x0000, /**< Register indirect w/ post-increment addressing
+                                             * mode @default */
+    DMA_CONFIG_ADDRMODE_REGIND_NOPOSTINC = 0x0004, /**< Register indirect w/o post-increment addressing
+                                             * mode */
+    DMA_CONFIG_ADDRMODE_PERIPHERAL_IND   = 0x0008, /**< Peripheral indirect addressing mode */
 
     // Null Write settings
-    DMA_BITMASK_NULLWRITE       = 0x0010, /**< Bitmask for Null Write settings */
-    DMA_NULLWRITE_DIS           = 0x0000, /**< Disable null write @default */
-    DMA_NULLWRITE_EN            = 0x0010, /**< Enable null write */
-
-    // Block Transfer Interrupt settings
-    DMA_BITMASK_INT             = 0x0020, /**< Bitmask for Block Transfer Interrupt settings */
-    DMA_INT_ALL                 = 0x0000, /**< Interrupt when all data has been moved @default */
-    DMA_INT_HALF                = 0x0020, /**< Interrupt when half data has been moved */
+    DMA_CONFIG_NULLWRITE_BITMASK         = 0x0010, /**< Bitmask for Null Write settings */
+    DMA_CONFIG_NULLWRITE_DIS             = 0x0000, /**< Disable null write @default */
+    DMA_CONFIG_NULLWRITE_EN              = 0x0010, /**< Enable null write */
 
     // Transfer Direction settings
-    DMA_BITMASK_DIR             = 0x0040, /**< Bitmask for Transfer Direction settings */
-    DMA_DIR_FROMPERIPHERAL      = 0x0000, /**< Transfer data from peripheral to DMA buffer @default */
-    DMA_DIR_TOPERIPHERAL        = 0x0040, /**< Transfer data to peripheral from DMA buffer */
+    DMA_CONFIG_DIR_BITMASK               = 0x0040, /**< Bitmask for Transfer Direction settings */
+    DMA_CONFIG_DIR_FROM_PERIPHERAL       = 0x0000, /**< Transfer data from peripheral to DMA buffer @default */
+    DMA_CONFIG_DIR_TO_PERIPHERAL         = 0x0040, /**< Transfer data to peripheral from DMA buffer */
 
     // Data Size settings
-    DMA_BITMASK_DATASIZE        = 0x0080, /**< Bitmask for Data Size settings */
-    DMA_DATASIZE_WORD           = 0x0000, /**< Transfer a word at a time @default */
-    DMA_DATASIZE_BYTE           = 0x0080  /**< Transfer a byte at a time */
-};
+    DMA_CONFIG_DATASIZE_BITMASK          = 0x0080, /**< Bitmask for Data Size settings */
+    DMA_CONFIG_DATASIZE_WORD             = 0x0000, /**< Transfer a word at a time @default */
+    DMA_CONFIG_DATASIZE_BYTE             = 0x0080  /**< Transfer a byte at a time */
+} dma_config_t;
 
 /**
  * @brief Defines the IRQs which may start a DMA transfer.
@@ -234,7 +250,7 @@ enum dma_control_settings_e
  * @see dma_attr_s
  * @public
  */
-enum dma_irq_e
+typedef enum dma_irq_e
 {
     DMA_IRQ_INT0    = 0x0000, /**< INT0 will cause a transfer @default */
     DMA_IRQ_IC1     = 0x0001, /**< IC1 will cause a transfer */
@@ -256,7 +272,7 @@ enum dma_irq_e
     DMA_IRQ_DCI     = 0x003C, /**< DCI will cause a transfer */
     DMA_IRQ_ECAN1TX = 0x0046, /**< ECAN1TX will cause a transfer */
     DMA_IRQ_ECAN2TX = 0x0047  /**< ECAN2TX will cause a transfer */
-};
+} dma_irq_t;
 
 /**
  * @brief Defines the valid peripheral addresses for a DMA transfer.
@@ -270,7 +286,7 @@ enum dma_irq_e
  * @see dma_attr_s
  * @public
  */
-enum dma_peripheral_address_e
+typedef enum dma_peripheral_e
 {
     DMA_PERIPHERAL_IC1BUF    = 0x0140, /**< IC1BUF peripheral address used for transfers */
     DMA_PERIPHERAL_IC2BUF    = 0x0144, /**< IC2BUF peripheral address used for transfers */
@@ -292,8 +308,37 @@ enum dma_peripheral_address_e
     DMA_PERIPHERAL_DCITXBUF0 = 0x0298, /**< DCITXBUF0 peripheral address used for transfers */
     DMA_PERIPHERAL_ADC1BUF0  = 0x0300, /**< ADC1BUF0 peripheral address used for transfers */
     DMA_PERIPHERAL_ADC2BUF0  = 0x0340  /**< ADC2BUF0 peripheral address used for transfers */
-};
+} dma_peripheral_t;
 
+/**
+ * @brief Options for when the DMA channel should interrupt.
+ *
+ * @details This enumeration provides the valid options for when a DMA channel will interrupt
+ * during a transfer. It can be at half or full block transfers or the interrupt can be disabled.
+ *
+ * @see dma_interrupt_on
+ * @public
+ */
+typedef enum dma_interrupt_on_e
+{
+    DMA_INTERRUPT_ON_FULL = 0x0000, /**< Interrupt on full block transfer. @default */
+    DMA_INTERRUPT_ON_HALF = 0x0001, /**< Interrupt on half block transfer. */
+} dma_interrupt_on_t;
+
+/**
+ * @brief The possible ping-pong buffer statuses.
+ *
+ * @details This enumeration provides the two possible ping-pong buffer states: buffer A selected,
+ * or buffer B selected.
+ *
+ * @see dma_pingpong_status
+ * @public
+ */
+typedef enum dma_pingpong_status_e
+{
+    DMA_PINGPONG_BUFFER_A = 0x0000, /**< Buffer A selected */
+    DMA_PINGPONG_BUFFER_B = 0x0001 /**< Buffer B selected */
+} dma_pingpong_status_t;
 
 
 /**
@@ -317,7 +362,7 @@ enum dma_peripheral_address_e
  * @public
  */
 int dma_init(dma_channel_t *dma_channel,
-             struct dma_attr_s *attr);
+             dma_attr_t *attr);
 
 /**
  * @brief Enables the DMA channel for transfers.
@@ -349,6 +394,52 @@ int dma_enable(dma_channel_t *dma_channel);
 int dma_disable(dma_channel_t *dma_channel);
 
 /**
+ * @brief Sets when a DMA interrupt should occur for the given channel.
+ *
+ * @details Sets whether a DMA interrupt should occur on half or full block transfers.
+ *
+ * @param[in]  dma_channel
+ *             A pointer to the DMA channel to work on.
+ * @param[in]  int_on
+ *             A value specifying when the DMA channel should interrupt.
+ * @returns An integer value representing the outcome of the function. The values are coded by the
+ * #dma_error_e enumeration.
+ *
+ * @public
+ */
+int dma_set_interrupt_on(dma_channel_t *dma_channel,
+                         dma_interrupt_on_t int_on);
+/**
+ * @brief Gets the dma_interrupt_on_t value of the given DMA channel.
+ *
+ * @details Returns the dma_interrupt_on_t value which determines whether a DMA interrupt should
+ * occur on half or full block transfers.
+ *
+ * @param[in]  dma_channel
+ *             A pointer to the DMA channel to work on.
+ * @returns The dma_interrupt_on_t value of the given DMA channel or a dma_error_t error code.
+ *
+ * @public
+ */
+int dma_get_interrupt_on(dma_channel_t *dma_channel);
+
+/**
+ * @brief Get the ping-pong buffer status.
+ *
+ * @details Get which buffer is currently selected. This is only used in ping-pong mode, however,
+ * if the function is called with ping-pong mode disabled it will always return buffer A.
+ *
+ * @param[in]  dma_channel
+ *             A pointer to the DMA channel to work on.
+ * @returns A dma_pingpong_status_t value coding for the currently selected buffer (A or B) or a
+ * dma_error_t error code.
+ *
+ * @see dma_pingpong_status_t
+ * @public
+ */
+int dma_pingpong_status(dma_channel_t *dma_channel);
+
+/**
  * @brief Forces a DMA transfer.
  *
  * @details This function forces the specified DMA channel to start a transfer.
@@ -363,86 +454,17 @@ int dma_disable(dma_channel_t *dma_channel);
 int dma_force(dma_channel_t *dma_channel);
 
 /**
- * @brief Outputs a pointer to the first word/byte of the primary DMA channel buffer.
+ * @brief Get the status of the force bit.
  *
- * @details This function outputs a pointer to the first word (or byte) of the primary buffer for
- * the specified DMA channel. This value will always point to the same address used during
- * initialization, even if ping-pong mode is enabled. This is because the primary buffer will
- * always be start with the first word (or byte) of the initialization buffer.
+ * @details Returns the status of the force bit in the given DMA channel.
  *
  * @param[in]  dma_channel
- *             A pointer to the DMA channel for which to get the buffer pointer.
- * @param[out] buffer
- *             A pointer to a pointer which stores the address of the primary buffer for the
- *             specified DMA channel.
- * @returns An integer value which, if negative, codes for a #dma_error_e enumeration value. If the
- * value is positive it represents the size of the primary DMA buffer.
+ *             A pointer to the DMA channel to work on.
+ * @returns The boolean value of the force bit of the given DMA channel.
  *
  * @public
  */
-int dma_get_bufferA(dma_channel_t *dma_channel,
-                    volatile unsigned int **buffer);
-
-/**
- * @brief Returns the size of the primary buffer in the specified DMA channel.
- *
- * @details This function will return the size of the primary buffer in the specified DMA channel.
- * If ping-pong mode is enabled then this size will be different than the @em buffer_size used to
- * initialize the DMA channel. To be specific it will be half the size.
- *
- * This is the same value returned by #dma_get_bufferA, so if both a pointer and size are needed
- * that function is a more efficient way to go about it (particularly if ping-pong mode is
- * enabled).
- *
- * @param[in]  dma_channel
- *             A pointer to the DMA channel from which to get the buffer size.
- * @returns An integer value which, if positive or zero, is the size of the current DMA buffer. If
- * the return value is negative the function call failed and the value represents a #dma_error_e
- * return code.
- *
- * @public
- */
-int dma_get_bufferA_size(dma_channel_t *dma_channel);
-
-/**
- * @brief Outputs a pointer to the first word/byte of the secondary DMA channel buffer.
- *
- * @details This function outputs a pointer to the first word (or byte) of the secondary buffer for
- * the specified DMA channel if ping-pong mode is enabled. However, if ping-pong mode is not
- * enabled then a NULL pointer is output and a zero size is returned.
- *
- * @param[in]  dma_channel
- *             A pointer to the DMA channel for which to get the buffer pointer.
- * @param[out] buffer
- *             A pointer to a pointer which stores the address of the secondary buffer for the
- *             specified DMA channel.
- * @returns An integer value which, if negative, codes for a #dma_error_e enumeration value. If the
- * value is positive or zero it represents the size of the secondary DMA buffer.
- *
- * @public
- */
-int dma_get_bufferB(dma_channel_t *dma_channel, volatile unsigned int **buffer);
-
-/**
- * @brief Returns the size of the secondary buffer in the specified DMA channel.
- *
- * @details This function will return the size of the secondary buffer in the specified DMA
- * channel. If ping-pong mode is enabled then this size will be different than the @em buffer_size
- * used to initialize the DMA channel. To be specific it will be half the size.
- *
- * This is the same value returned by #dma_get_bufferB, so if both a pointer and size are needed
- * that function is a more efficient way to go about it (particularly if ping-pong mode is
- * enabled).
- *
- * @param[in]  dma_channel
- *             A pointer to the DMA channel from which to get the buffer size.
- * @returns An integer value which, if positive, is the size of the secondary DMA buffer. If the
- * return value is negative the function call failed and the value represents a #dma_error_e
- * return code.
- *
- * @public
- */
-int dma_get_bufferB_size(dma_channel_t *dma_channel);
+bool dma_is_force(dma_channel_t *dma_channel);
 
 /**
  * @brief Sets the block transfer size for the specified DMA channel.
@@ -499,8 +521,8 @@ int dma_get_block_size(dma_channel_t *dma_channel);
  *
  * @public
  */
-int dma_get_attr(dma_channel_t * dma_channel,
-                 struct dma_attr_s *attr);
+int dma_get_attr(dma_channel_t *dma_channel,
+                 dma_attr_t *attr);
 
 /**
  * @brief Cleans up a DMA channel for deletion or reinitialization.
@@ -530,22 +552,13 @@ int dma_cleanup(dma_channel_t *dma_channel);
  *
  * @public
  */
-inline bool dma_isvalid(dma_channel_t *dma_channel)
-{
-    if( dma_channel == NULL || dma_channel->base_address == NULL || dma_channel->buffer == NULL || dma_channel->buffer_size == 0 )
-    {// Invalid
-        return false;
-    }
-    else
-    {// Assume valid
-        return true;
-    }
-}
+inline bool dma_is_valid(dma_channel_t *dma_channel);
+
 
 /**
  * @}
  */ // End of DMAChannel group
 
 // End of include guard
-#endif //_DMA_CHANNEL_H
+#endif //_DMA_CHANNEL_XC16_H
 
