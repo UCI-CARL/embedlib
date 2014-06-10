@@ -10,8 +10,8 @@
  *
  * @date 12/3/2012
  * @author Liam Bucci
- * @carlnumber FIRM-0004
- * @version 0.3.0
+ * @carlnumber FIRM-0009
+ * @version 0.4.0
  *
  */
 
@@ -19,7 +19,6 @@
 #ifndef _DMA_CHANNEL_XC16_H
 #define _DMA_CHANNEL_XC16_H
 
-#include <stdbool.h>
 
 /**
  * @defgroup DMAChannel DMA Channel
@@ -28,11 +27,6 @@
  *
  * @details This module provides an interface for a single DMA channel. It allows the user to
  * configure and use the DMA channel with minimal hardware interfacing.
- *
- * If ping-pong mode is enabled the supplied buffer will be split in half and the lower half will
- * be used as the primary buffer (bufferA) and the upper half will be used as the secondary buffer
- * (bufferB). The buffer size must be an even number otherwise the block transfer size will be off
- * by one and the buffers will be mismatched.
  *
  * @{
  */
