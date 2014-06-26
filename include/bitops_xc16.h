@@ -112,11 +112,13 @@
 
 #define WRITE_BITS_INSERT(val,mask,insert) (val) = BITS_INSERT((val),(mask),(insert))
 
+
+
 #define IS_BIT_SET(val,n)          ( ((val)&(1<<(n))) != 0 )
 
 #define IS_BIT_CLEAR(val,n)        ( ((~(val))&(1<<(n))) != 0 )
 
-#define IS_MASK_SET(val,mask)      ( ((val)&(mask)) != 0 )
+#define IS_MASK_SET(val,mask)      ( ((val)&(mask)) != (mask) )
 
 #define IS_MASK_CLEAR(val,mask)    ( ((~(val))&(mask)) != 0 )
 

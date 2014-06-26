@@ -30,27 +30,17 @@
 // Microchip peripheral libraries
 #include <p33Fxxxx.h>
 
+// Hardware specific module include file
+#include <dma_hw.h>
+
 // Module include file
 #include <dma_channel.h>
 
+// Private preprocessor macros
+#define DMA_GET_BASE_ADDRESS(dma_channel) ( ((struct dma_private_s *)((dma_channel)->private))->_base_address )
 
-/**
- * @brief The private data structure which holds the data for a DMA channel.
- *
- * @details This private data structure holds the attributes and settings which have been used to
- * initialize a DMA channel. When the #dma_init function is called on a #dma_channel_t variable
- * the #dma_attr_s is copied into this structure for safe keeping. The attributes may only be
- * changed if the DMA channel is reinitialized.
- *
- * @private
- */
-struct dma_private_s
-{
-    struct dma_attr_s _attr;
 
-    volatile unsigned int * base_address;
-};
-
+/* Private Constants */
 
 /**
  * @brief Defines the offsets of all SFRs associated with a DMA channel.
@@ -148,12 +138,34 @@ enum dma_sfr_defaults_e
 };
 
 
+/* ***** Private Struct Definition ***** */
+
+/**
+ * @brief The private data structure which holds the data for a DMA channel.
+ *
+ * @details This private data structure holds the attributes and settings which have been used to
+ * initialize a DMA channel. When the #dma_init function is called on a #dma_channel_t variable
+ * the #dma_attr_s is copied into this structure for safe keeping. The attributes may only be
+ * changed if the DMA channel is reinitialized.
+ *
+ * @private
+ */
+struct dma_private_s
+{
+    struct dma_attr_s _attr;
+
+    volatile unsigned int * _base_address;
+};
+
+
+/* ***** Public Function Definitions ***** */
+
 int dma_init(dma_channel_t *dma_channel,
              dma_attr_t *attr)
 {
     // Check for valid dma_channel
     if( dma_channel == NULL \
-        || dma_channel->channel_number > 7 \
+        || dma_channel->channel_number > (DMA_HW_NUMBER_OF_CHANNELS-1) \
         || dma_channel->buffer_a == NULL \
         || dma_channel->buffer_a_size == 0 \
         || (dma_channel->buffer_b == NULL && dma_channel->buffer_b_size > 0) )
@@ -187,33 +199,33 @@ int dma_init(dma_channel_t *dma_channel,
     }
 
     // Save the attr struct to the private data object
-    ((struct dma_private_s *)dma_channel->private)->attr = *attr;
+    ((struct dma_private_s *)dma_channel->private)->_attr = *attr;
 
     switch(dma_channel->channel_number)
     {
     case 0:
-        *((struct dma_private_s)(dma_channel->private)->base_address) = DMA0CON;
+        DMA_GET_BASE_ADDRESS(dma_channel) = DMA_HW_BASE_ADDRESS_CH0;
         break;
     case 1:
-        *((struct dma_private_s)(dma_channel->private)->base_address) = DMA1CON;
+        DMA_GET_BASE_ADDRESS(dma_channel) = DMA_HW_BASE_ADDRESS_CH1;
         break;
     case 2:
-        *((struct dma_private_s)(dma_channel->private)->base_address) = DMA2CON;
+        DMA_GET_BASE_ADDRESS(dma_channel) = DMA_HW_BASE_ADDRESS_CH2;
         break;
     case 3:
-        *((struct dma_private_s)(dma_channel->private)->base_address) = DMA3CON;
+        DMA_GET_BASE_ADDRESS(dma_channel) = DMA_HW_BASE_ADDRESS_CH3;
         break;
     case 4:
-        *((struct dma_private_s)(dma_channel->private)->base_address) = DMA4CON;
+        DMA_GET_BASE_ADDRESS(dma_channel) = DMA_HW_BASE_ADDRESS_CH4;
         break;
     case 5:
-        *((struct dma_private_s)(dma_channel->private)->base_address) = DMA5CON;
+        DMA_GET_BASE_ADDRESS(dma_channel) = DMA_HW_BASE_ADDRESS_CH5;
         break;
     case 6:
-        *((struct dma_private_s)(dma_channel->private)->base_address) = DMA6CON;
+        DMA_GET_BASE_ADDRESS(dma_channel) = DMA_HW_BASE_ADDRESS_CH6;
         break;
     case 7:
-        *((struct dma_private_s)(dma_channel->private)->base_address) = DMA7CON;
+        DMA_GET_BASE_ADDRESS(dma_channel) = DMA_HW_BASE_ADDRESS_CH7;
         break;
     default:
         // Invalid channel number (should have already been checked!)
@@ -223,24 +235,24 @@ int dma_init(dma_channel_t *dma_channel,
         
     
     // Set all registers to default values
-    *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxCON) \
+    *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCON) \
         = DMA_SFR_DEFAULT_DMAxCON;
-    *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxREQ) \
+    *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxREQ) \
         = DMA_SFR_DEFAULT_DMAxREQ;
-    *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxSTA) \
+    *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxSTA) \
         = DMA_SFR_DEFAULT_DMAxSTA;
-    *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxSTB) \
+    *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxSTB) \
         = DMA_SFR_DEFAULT_DMAxSTB;
-    *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxPAD) \
+    *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxPAD) \
         = DMA_SFR_DEFAULT_DMAxPAD;
-    *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxCNT) \
+    *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCNT) \
         = DMA_SFR_DEFAULT_DMAxCNT;
 
     
     // Configure DMA operating mode
     if( (attr->config & DMA_CONFIG_OPMODE_BITMASK) == DMA_CONFIG_OPMODE_ONESHOT )
     {// One-shot mode
-        WRITE_MASK_SET(*(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_MODE0);
+        WRITE_MASK_SET(*(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_MODE0);
     }
     else
     {// Otherwise default to Continuous
@@ -250,22 +262,26 @@ int dma_init(dma_channel_t *dma_channel,
     // Configure Ping-Pong mode
     if( (attr->config & DMA_CONFIG_PINGPONG_BITMASK) == DMA_CONFIG_PINGPONG_EN )
     {// Enable Ping-Pong mode
-        WRITE_MASK_SET(*(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_MODE1);
+        WRITE_MASK_SET(*(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_MODE1);
 
-        // Set up buffers and initial block size
-        *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxSTA) \
-            = __builtin_dmaoffset(dma_channel->buffer_a);
-        *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxSTB) \
-            = __builtin_dmaoffset(dma_channel->buffer_b);
-        *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxCNT) \
+        // Set up buffers and initial block size.
+        // We can't use __builtin_dmaoffset() since we don't have the static variable to get the
+        // address from, so we must do the offset calculation manually.
+        *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxSTA) \
+            = (volatile unsigned int)(dma_channel->buffer_a) - (volatile unsigned int)(&_DMA_BASE);
+        *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxSTB) \
+            = (volatile unsigned int)(dma_channel->buffer_b) - (volatile unsigned int)(&_DMA_BASE);
+        *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCNT) \
             = dma_channel->buffer_a_size;
     }
     else
     {// Otherwise default to disabled
         // Set up buffer and block size
-        *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxSTA) \
-            = __builtin_dmaoffset(dma_channel->buffer);
-        *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxCNT) \
+        // We can't use __builtin_dmaoffset() since we don't have the static variable to get the
+        // address from, so we must do the offset calculation manually.
+        *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxSTA) \
+            = (volatile unsigned int)(dma_channel->buffer_a) - (volatile unsigned int)(&_DMA_BASE);
+        *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCNT) \
             = dma_channel->buffer_a_size;
     }
     
@@ -273,11 +289,11 @@ int dma_init(dma_channel_t *dma_channel,
     // Configure Addressing mode
     if( (attr->config & DMA_CONFIG_ADDRMODE_BITMASK) == DMA_CONFIG_ADDRMODE_PERIPHERAL_IND )
     {// Peripheral indirect mode
-        WRITE_MASK_SET(*(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_AMODE1);
+        WRITE_MASK_SET(*(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_AMODE1);
     }
     else if( (attr->config & DMA_CONFIG_ADDRMODE_BITMASK) == DMA_CONFIG_ADDRMODE_REGIND_NOPOSTINC )
     {// Register indirect w/o post-increment
-        WRITE_MASK_SET(*(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_AMODE0);
+        WRITE_MASK_SET(*(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_AMODE0);
     }
     else
     {// Default to register indirect w/ post-increment
@@ -287,7 +303,7 @@ int dma_init(dma_channel_t *dma_channel,
     // Configure Null Write
     if( (attr->config & DMA_CONFIG_NULLWRITE_BITMASK) == DMA_CONFIG_NULLWRITE_EN )
     {// Enable Null Write
-        WRITE_MASK_SET(*(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_NULLW);
+        WRITE_MASK_SET(*(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_NULLW);
     }
     else
     {// Otherwise default to disabled
@@ -297,7 +313,7 @@ int dma_init(dma_channel_t *dma_channel,
     // Configure Transfer Direction
     if( (attr->config & DMA_CONFIG_DIR_BITMASK) == DMA_CONFIG_DIR_TO_PERIPHERAL )
     {// Transfer to peripheral
-        WRITE_MASK_SET(*(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_DIR);
+        WRITE_MASK_SET(*(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_DIR);
     }
     else
     {// Otherwise default to transfer from peripheral
@@ -306,17 +322,17 @@ int dma_init(dma_channel_t *dma_channel,
     // Configure Data Size
     if( (attr->config & DMA_CONFIG_DATASIZE_BITMASK) == DMA_CONFIG_DATASIZE_BYTE )
     {// Data size is byte
-        WRITE_MASK_SET(*(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_SIZE);
+        WRITE_MASK_SET(*(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_SIZE);
     }
     else
     {// Otherwise default to word size
     }
     
     // Set DMAxREQ register (interrupt which triggers a DMA transfer)
-    WRITE_BITS_INSERT(*(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxREQ), attr->irq, DMA_SFR_BITMASK_IRQSEL);
+    WRITE_BITS_INSERT(*(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxREQ), attr->irq, DMA_SFR_BITMASK_IRQSEL);
 
     // Set DMAxPAD register (peripheral address the DMA transfer writes to/reads from)
-    *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxPAD) \
+    *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxPAD) \
         = (volatile unsigned int)attr->peripheral_address;
 
     
@@ -335,7 +351,7 @@ int dma_enable(dma_channel_t *dma_channel)
     }
 
     // Enable DMA channel
-    WRITE_MASK_SET(*(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_CHEN);
+    WRITE_MASK_SET(*(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_CHEN);
 
     // Return successfully
     return DMA_E_NONE;
@@ -352,7 +368,7 @@ int dma_disable(dma_channel_t *dma_channel)
     }
 
     // Disable DMA channel
-    WRITE_MASK_CLEAR(*(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_CHEN);
+    WRITE_MASK_CLEAR(*(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_CHEN);
 
     // Return successfully
     return DMA_E_NONE;
@@ -371,11 +387,11 @@ int dma_set_interrupt_on(dma_channel_t *dma_channel,
     // Set block transfer interrupt
     if( int_on == DMA_INTERRUPT_ON_HALF )
     {// Set interrupts to half block transfer
-        WRITE_MASK_SET(*(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_HALF);
+        WRITE_MASK_SET(*(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_HALF);
     }
     else if( int_on == DMA_INTERRUPT_ON_FULL )
     {// Set interrupts to full block transfer
-        WRITE_MASK_CLEAR(*(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_HALF);
+        WRITE_MASK_CLEAR(*(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_HALF);
     }
     else
     {// Unknown int_on value
@@ -397,7 +413,7 @@ int dma_get_interrupt_on(dma_channel_t *dma_channel)
     }
 
     // Check interrupt setting
-    if( IS_MASK_SET(*(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_HALF) )
+    if( IS_MASK_SET(*(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCON), DMA_SFR_BITMASK_HALF) )
     {// Interrupt on half block transfer
         return DMA_INTERRUPT_ON_HALF;
     }
@@ -417,7 +433,7 @@ int dma_pingpong_status(dma_channel_t *dma_channel)
     }
 
     // Check ping-pong setting
-    if( IS_BIT_SET(DMASCS1, dma_channel->channel_number) )
+    if( IS_BIT_SET(DMACS1, dma_channel->channel_number) )
     {// Ping-pong buffer B selected
         return DMA_PINGPONG_BUFFER_B;
     }
@@ -437,7 +453,7 @@ int dma_force(dma_channel_t *dma_channel)
     }
 
     // Force a DMA transfer
-    WRITE_MASK_SET(*(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_OFFSET_DMAxREQ), DMA_BITMASK_FORCE);
+    WRITE_MASK_SET(*(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxREQ), DMA_SFR_BITMASK_FORCE);
 
     // Return successfully
     return DMA_E_NONE;
@@ -459,7 +475,7 @@ int dma_set_block_size(dma_channel_t *dma_channel,
      */
 
     // Set the DMAxCNT register
-    *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_OFFSET_CNT) = block_size-1;
+    *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCNT) = block_size-1;
 
     // Return successfully
     return DMA_E_NONE;
@@ -476,7 +492,7 @@ int dma_get_block_size(dma_channel_t *dma_channel)
     }
 
     // Return the DMAxCNT register
-    return *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_OFFSET_CNT) + 1;
+    return *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCNT) + 1;
 }
 
 
@@ -490,7 +506,7 @@ int dma_get_attr(dma_channel_t *dma_channel,
     }
 
     // Copy attr struct
-    *attr = ((struct dma_private_s *)dma_channel->private)->attr;
+    *attr = ((struct dma_private_s *)(dma_channel->private))->_attr;
 
     return DMA_E_NONE;
 }
@@ -507,12 +523,12 @@ int dma_cleanup(dma_channel_t *dma_channel)
     dma_disable(dma_channel);
 
     // Return channel to default settings
-    *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_OFFSET_DMAxCON) = DMA_DEFAULT_DMAxCON;
-    *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_OFFSET_DMAxREQ) = DMA_DEFAULT_DMAxREQ;
-    *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_OFFSET_DMAxSTA) = DMA_DEFAULT_DMAxSTA;
-    *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_OFFSET_DMAxSTB) = DMA_DEFAULT_DMAxSTB;
-    *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_OFFSET_DMAxPAD) = DMA_DEFAULT_DMAxPAD;
-    *(((struct dma_private_s)(dma_channel->private)->base_address) + DMA_OFFSET_DMAxCNT) = DMA_DEFAULT_DMAxCNT;
+    *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCON) = DMA_SFR_DEFAULT_DMAxCON;
+    *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxREQ) = DMA_SFR_DEFAULT_DMAxREQ;
+    *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxSTA) = DMA_SFR_DEFAULT_DMAxSTA;
+    *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxSTB) = DMA_SFR_DEFAULT_DMAxSTB;
+    *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxPAD) = DMA_SFR_DEFAULT_DMAxPAD;
+    *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxCNT) = DMA_SFR_DEFAULT_DMAxCNT;
     
     // Free private struct
     free(dma_channel->private);
@@ -524,10 +540,10 @@ int dma_cleanup(dma_channel_t *dma_channel)
 inline bool dma_is_valid(dma_channel_t *dma_channel)
 {
     return ( dma_channel == NULL \
-             || dma_channel->channel_number > 7 \
+             || dma_channel->channel_number > (DMA_HW_NUMBER_OF_CHANNELS-1) \
              || dma_channel->buffer_a == NULL \
              || dma_channel->buffer_a_size == 0 \
-             || (buffer_b == NULL && buffer_b_size != 0) \
+             || (dma_channel->buffer_b == NULL && dma_channel->buffer_b_size != 0) \
              || dma_channel->private == NULL ) ? false : true;
 }
 

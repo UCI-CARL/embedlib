@@ -31,116 +31,9 @@
  * @{
  */
 
-/**
- * @brief Stores the attributes and settings of a DMA channel.
- *
- * @details This struct stores the settings and configurations of a DMA channel. These settings are
- * what is used during initialization to configure the hardware DMA module. Once a DMA channel is
- * initialized these settings shouldn't be changed without reinitializing the channel.
- *
- * @public
- */
-typedef struct dma_attr_s
-{
-    /**
-     * @brief DMA channel configuration.
-     *
-     * @details These settings control how the DMA channel operates.
-     */
-    unsigned int config;
+// Include standard C library files
+#include <stdbool.h>
 
-    /**
-     * @brief The IRQ which triggers a DMA transfer.
-     */
-    dma_irq_t irq;
-
-    /**
-     * @brief The peripheral address to either read from or write to.
-     */
-    dma_peripheral_t peripheral_address;
-} dma_attr_t;
-
-/**
- * @brief A struct which represents a specific instance of a DMA channel.
- *
- * @details This structure holds the data which defines a particular DMA channel. There is a one-
- * to-one relationship between a #dma_channel_t data structure and a hardware DMA channel.
- *
- * The @em base_address should be set to the DMAxCON register address for the particular DMA
- * channel which will be described.
- *
- * @public
- */
-typedef struct dma_channel_s
-{
-    /**
-     * @brief The DMA channel number.
-     *
-     * @details This is the channel number from 0-7 of the DMA channel. This is used to help map
-     * the correct special function registers and to return the correct data from global DMA
-     * registers (e.g. DMACS0).
-     *
-     * This value should only be set once, during instantiation of the dma_channel_t object.
-     */
-    const unsigned int channel_number;
-
-    /**
-     * @brief A pointer to buffer A in DMA DPSRAM.
-     *
-     * @details This is a pointer to buffer A in DMA DPSRAM. This buffer is used when ping-pong
-     * mode is disabled and as buffer A when ping-pong mode is disabled.
-     *
-     * This pointer may only be set once, during instantiation. It is assumed this value will
-     * point to a statically allocated array in DMA DPSRAM. If the array is not in DPSRAM then DMA
-     * transfers will not succeed.
-     */
-    volatile unsigned int * const buffer_a;
-
-    /**
-     * @brief The size of buffer A in DMA DPSRAM.
-     *
-     * @details This is the size of the array pointed to by @em buffer. This value may not extend
-     * the array past the bounds of DPSRAM or else any DMA transfers to addresses outside the DMA
-     * space will fail.
-     *
-     * This value should only be set once, during instantiation.
-     */
-    const unsigned int buffer_a_size;
-
-    /**
-     * @brief A pointer to buffer B in DMA DPSRAM.
-     *
-     * @details This is a pointer to buffer B in DMA DPSRAM which should be used for transfers.
-     * This buffer should only be used if the module is configured to use Ping-Ping mode.
-     *
-     * This pointer may only be set once, during instantiation. It is assumed this value will
-     * point to a statically allocated array in DMA DPSRAM. If the array is not in DPSRAM then DMA
-     * transfers will not succeed. If buffer B is unused this value should be NULL.
-     */
-    volatile unsigned int * const buffer_b;
-
-    /**
-     * @brief The size of buffer B in DMA DPSRAM.
-     *
-     * @details This is the size of the array pointed to by @em buffer_b. This value may not extend
-     * the array past the bounds of DPSRAM or else any DMA transfers to addresses outside the DMA
-     * space will fail.
-     *
-     * This value should only be set once, during initialization, and should be the true size of
-     * the statically allocated array in DMA DPSRAM. If buffer B is unused this value should be 0.
-     */
-    const unsigned int buffer_b_size;
-    
-    /**
-     * @brief This holds private data specific to this channel.
-     *
-     * @details This pointer will point to a private structure which will be dynamically allocated
-     * during initialization. For this reason, before either removal or reinitialization the
-     * #dma_cleanup function should be called on the channel.
-     */
-    void *private;
-
-} dma_channel_t;
 
 /**
  * @brief Return codes for all DMA channel functions
@@ -333,6 +226,124 @@ typedef enum dma_pingpong_status_e
     DMA_PINGPONG_BUFFER_A = 0x0000, /**< Buffer A selected */
     DMA_PINGPONG_BUFFER_B = 0x0001 /**< Buffer B selected */
 } dma_pingpong_status_t;
+
+
+/**
+ * @brief Stores the attributes and settings of a DMA channel.
+ *
+ * @details This struct stores the settings and configurations of a DMA channel. These settings are
+ * what is used during initialization to configure the hardware DMA module. Once a DMA channel is
+ * initialized these settings shouldn't be changed without reinitializing the channel.
+ *
+ * @public
+ */
+typedef struct dma_attr_s
+{
+    /**
+     * @brief DMA channel configuration.
+     *
+     * @details These settings control how the DMA channel operates.
+     */
+    unsigned int config;
+
+    /**
+     * @brief The IRQ which triggers a DMA transfer.
+     */
+    dma_irq_t irq;
+
+    /**
+     * @brief The peripheral address to either read from or write to.
+     */
+    dma_peripheral_t peripheral_address;
+} dma_attr_t;
+
+
+// Forward declaration of dma_channel_t for use in dma_channel_s definition
+struct dma_channel_s;
+typedef struct dma_channel_s dma_channel_t;
+
+/**
+ * @brief A struct which represents a specific instance of a DMA channel.
+ *
+ * @details This structure holds the data which defines a particular DMA channel. There is a one-
+ * to-one relationship between a #dma_channel_t data structure and a hardware DMA channel.
+ *
+ * The @em base_address should be set to the DMAxCON register address for the particular DMA
+ * channel which will be described.
+ *
+ * @public
+ */
+struct dma_channel_s
+{
+    /**
+     * @brief The DMA channel number.
+     *
+     * @details This is the channel number from 0-7 of the DMA channel. This is used to help map
+     * the correct special function registers and to return the correct data from global DMA
+     * registers (e.g. DMACS0).
+     *
+     * This value should only be set once, during instantiation of the dma_channel_t object.
+     */
+    const unsigned int channel_number;
+
+    /**
+     * @brief A pointer to buffer A in DMA DPSRAM.
+     *
+     * @details This is a pointer to buffer A in DMA DPSRAM. This buffer is used when ping-pong
+     * mode is disabled and as buffer A when ping-pong mode is disabled.
+     *
+     * This pointer may only be set once, during instantiation. It is assumed this value will
+     * point to a statically allocated array in DMA DPSRAM. If the array is not in DPSRAM then DMA
+     * transfers will not succeed.
+     */
+    volatile unsigned int * const buffer_a;
+
+    /**
+     * @brief The size of buffer A in DMA DPSRAM.
+     *
+     * @details This is the size of the array pointed to by @em buffer. This value may not extend
+     * the array past the bounds of DPSRAM or else any DMA transfers to addresses outside the DMA
+     * space will fail.
+     *
+     * This value should only be set once, during instantiation.
+     */
+    const unsigned int buffer_a_size;
+
+    /**
+     * @brief A pointer to buffer B in DMA DPSRAM.
+     *
+     * @details This is a pointer to buffer B in DMA DPSRAM which should be used for transfers.
+     * This buffer should only be used if the module is configured to use Ping-Ping mode.
+     *
+     * This pointer may only be set once, during instantiation. It is assumed this value will
+     * point to a statically allocated array in DMA DPSRAM. If the array is not in DPSRAM then DMA
+     * transfers will not succeed. If buffer B is unused this value should be NULL.
+     */
+    volatile unsigned int * const buffer_b;
+
+    /**
+     * @brief The size of buffer B in DMA DPSRAM.
+     *
+     * @details This is the size of the array pointed to by @em buffer_b. This value may not extend
+     * the array past the bounds of DPSRAM or else any DMA transfers to addresses outside the DMA
+     * space will fail.
+     *
+     * This value should only be set once, during initialization, and should be the true size of
+     * the statically allocated array in DMA DPSRAM. If buffer B is unused this value should be 0.
+     */
+    const unsigned int buffer_b_size;
+    
+    /**
+     * @brief This holds private data specific to this channel.
+     *
+     * @details This pointer will point to a private structure which will be dynamically allocated
+     * during initialization. For this reason, before either removal or reinitialization the
+     * #dma_cleanup function should be called on the channel.
+     */
+    void *private;
+
+};
+
 
 
 /**
