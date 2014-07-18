@@ -470,12 +470,20 @@ typedef enum canbus_error_e
  */
 struct canbus_header_s
 {
+    int auto_tx :1; /**< Automatically transmit the message when an RTR message is received. */
+    
     int sid :11; /**< The standard ID of a message (11-bits). */
     int rtr :1;  /**< The remote transmit request (RTR) bit. */
     int ide :1;  /**< The extended ID enable bit. */
-    int eid :18; /**< The extend ID of a message (18-bits). */
-
-    int auto_tx :1; /**< Automatically transmit the message when an RTR message is received. */
+    union
+    {
+        int eid :18; /**< The extend ID of a message (18-bits). */
+        struct
+        {
+            int eid_l :16;
+            int eid_h :2;
+        };
+    };
 };
 typedef struct canbus_header_s canbus_header_t;
 

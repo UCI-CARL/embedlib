@@ -772,31 +772,38 @@ union canbus_cirxfnsid_bits_u
     };
     struct
     {
-        int eid :2;
+        int eid_h :2;
         int :3;
         int sid :11;
     };
 };
 typedef union canbus_cirxfnsid_bits_u canbus_cirxfnsid_bits_t;
 
-struct canbus_cirxfneid_bits_s
+union canbus_cirxfneid_bits_u
 {
-    int eid0 :1;
-    int eid1 :1;
-    int eid2 :1;
-    int eid3 :1;
-    int eid4 :1;
-    int eid5 :1;
-    int eid6 :1;
-    int eid7 :1;
-    int eid8 :1;
-    int eid9 :1;
-    int eid10 :1;
-    int eid11 :1;
-    int eid12 :1;
-    int eid13 :1;
-    int eid14 :1;
-    int eid15 :1;
+    struct
+    {
+        int eid0 :1;
+        int eid1 :1;
+        int eid2 :1;
+        int eid3 :1;
+        int eid4 :1;
+        int eid5 :1;
+        int eid6 :1;
+        int eid7 :1;
+        int eid8 :1;
+        int eid9 :1;
+        int eid10 :1;
+        int eid11 :1;
+        int eid12 :1;
+        int eid13 :1;
+        int eid14 :1;
+        int eid15 :1;
+    };
+    struct
+    {
+        int eid_l :16;
+    };
 };
 typedef struct canbus_cirxfneid_bits_s canbus_cirxfneid_bits_t;
     
@@ -1510,6 +1517,53 @@ static int canbus_set_mask(canbus_t *object,
                            canbus_mask_t mask_num,
                            canbus_header_t *mask_value)
 {
+    // Check for a valid object
+    if( !canbus.is_valid(object) )
+    {// Object is invalid
+        return CANBUS_E_OBJECT;
+    }
+
+    // Switch to filter window
+    ((canbus_cictrl1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCTRL1))->win = 1;
+
+    if( mask_num == CANBUS_MASK_M0 || mask_num == CANBUS_MASK_ALL )
+    {
+        ((canbus_cirxmnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM0SID)) \
+            ->sid = mask_value->sid;
+        ((canbus_cirxmnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM0SID)) \
+            ->mide = mask_value->ide;
+        ((canbus_cirxmnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM0SID)) \
+            ->eid_h = mask_value->eid_h;
+        ((canbus_cirxmneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM0EID)) \
+            ->eid_l = mask_value->eid_l;
+    }
+    if( mask_num == CANBUS_MASK_M1 || mask_num == CANBUS_MASK_ALL )
+    {
+        ((canbus_cirxmnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM1SID)) \
+            ->sid = mask_value->sid;
+        ((canbus_cirxmnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM1SID)) \
+            ->mide = mask_value->ide;
+        ((canbus_cirxmnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM1SID)) \
+            ->eid_h = mask_value->eid_h;
+        ((canbus_cirxmneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM1EID)) \
+            ->eid_l = mask_value->eid_l;
+    }
+    if( mask_num == CANBUS_MASK_M2 || mask_num == CANBUS_MASK_ALL )
+    {
+        ((canbus_cirxmnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM2SID)) \
+            ->sid = mask_value->sid;
+        ((canbus_cirxmnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM2SID)) \
+            ->mide = mask_value->ide;
+        ((canbus_cirxmnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM2SID)) \
+            ->eid_h = mask_value->eid_h;
+        ((canbus_cirxmneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM2EID)) \
+            ->eid_l = mask_value->eid_l;
+    }
+
+    // Switch to buffer window
+    ((canbus_cictrl1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCTRL1))->win = 0;
+
+    return CANBUS_E_NONE;
 }
     
 /**
@@ -1523,6 +1577,371 @@ static int canbus_assign_mask(canbus_t *object,
                               canbus_mask_t mask_num,
                               canbus_filter_t filter_num)
 {
+    // Check for valid object
+    if( !canbus.is_valid(object) )
+    {// Object is invalid
+        return CANBUS_E_OBJECT;
+    }
+
+    // Check for valid mask_num input
+    // Mask must be M0, M1, or M2, not NONE or ALL (or something else)
+    if( !(mask_num == CANBUS_MASK_M0            \
+          || mask_num == CANBUS_MASK_M1         \
+          || mask_num == CANBUSS_MASK_M2) )
+    {// Invalid input
+        return CANBUS_E_INPUT;
+    }
+
+    // Check for avlid filter_num input
+    // Filter must be F0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, or F15,
+    // not NONE (or something else)
+    if( !(filter_num == CANBUS_FILTER_F0        \
+          || filter_num == CANBUS_FILTER_F1     \
+          || filter_num == CANBUS_FILTER_F2     \
+          || filter_num == CANBUS_FILTER_F3     \
+          || filter_num == CANBUS_FILTER_F4     \
+          || filter_num == CANBUS_FILTER_F5     \
+          || filter_num == CANBUS_FILTER_F6     \
+          || filter_num == CANBUS_FILTER_F7     \
+          || filter_num == CANBUS_FILTER_F8     \
+          || filter_num == CANBUS_FILTER_F9     \
+          || filter_num == CANBUS_FILTER_F10    \
+          || filter_num == CANBUS_FILTER_F11    \
+          || filter_num == CANBUS_FILTER_F12    \
+          || filter_num == CANBUS_FILTER_F13    \
+          || filter_num == CANBUS_FILTER_F14    \
+          || filter_num == CANBUS_FILTER_F15    \
+          || filter_num == CANBUS_FILTER_ALL) )
+    {// Invalid input
+        return CANBUS_E_INPUT;
+    }
+
+    // Switch to filter window
+    ((canbus_cictrl1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCTRL1))->win = 1;
+
+    if( filter_num == CANBUS_FILTER_F0 )
+    {
+        if( mask_num == CANBUS_MASK_M0 )
+        {// Assign mask 0 to filter 0
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f0msk = 0b00;
+        }
+        else if( mask_num == CANBUS_MASK_M1 )
+        {// Assign mask 1 to filter 0
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f0msk = 0b01;
+        }
+        else
+        {// Assign mask 2 to filter 0
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f0msk = 0b10;
+        }
+    }
+    else if( filter_num == CANBUS_FILTER_F1 )
+    {
+        if( mask_num == CANBUS_MASK_M0 )
+        {// Assign mask 0 to filter 1
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f1msk = 0b00;
+        }
+        else if( mask_num == CANBUS_MASK_M1 )
+        {// Assign mask 1 to filter 1
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f1msk = 0b01;
+        }
+        else
+        {// Assign mask 2 to filter 1
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f1msk = 0b10;
+        }
+    }
+    else if( filter_num == CANBUS_FILTER_F2 )
+    {
+        if( mask_num == CANBUS_MASK_M0 )
+        {// Assign mask 0 to filter 2
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f2msk = 0b00;
+        }
+        else if( mask_num == CANBUS_MASK_M1 )
+        {// Assign mask 1 to filter 2
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f2msk = 0b01;
+        }
+        else
+        {// Assign mask 2 to filter 2
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f2msk = 0b10;
+        }
+    }
+    else if( filter_num == CANBUS_FILTER_F3 )
+    {
+        if( mask_num == CANBUS_MASK_M0 )
+        {// Assign mask 0 to filter 3
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f3msk = 0b00;
+        }
+        else if( mask_num == CANBUS_MASK_M1 )
+        {// Assign mask 1 to filter 3
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f3msk = 0b01;
+        }
+        else
+        {// Assign mask 2 to filter 3
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f3msk = 0b10;
+        }
+    }
+    else if( filter_num == CANBUS_FILTER_F4 )
+    {
+        if( mask_num == CANBUS_MASK_M0 )
+        {// Assign mask 0 to filter 4
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f4msk = 0b00;
+        }
+        else if( mask_num == CANBUS_MASK_M1 )
+        {// Assign mask 1 to filter 4
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f4msk = 0b01;
+        }
+        else
+        {// Assign mask 2 to filter 4
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f4msk = 0b10;
+        }
+    }
+    else if( filter_num == CANBUS_FILTER_F5 )
+    {
+        if( mask_num == CANBUS_MASK_M0 )
+        {// Assign mask 0 to filter 5
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f5msk = 0b00;
+        }
+        else if( mask_num == CANBUS_MASK_M1 )
+        {// Assign mask 1 to filter 5
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f5msk = 0b01;
+        }
+        else
+        {// Assign mask 2 to filter 5
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f5msk = 0b10;
+        }
+    }
+    else if( filter_num == CANBUS_FILTER_F6 )
+    {
+        if( mask_num == CANBUS_MASK_M0 )
+        {// Assign mask 0 to filter 6
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f6msk = 0b00;
+        }
+        else if( mask_num == CANBUS_MASK_M1 )
+        {// Assign mask 1 to filter 6
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f6msk = 0b01;
+        }
+        else
+        {// Assign mask 2 to filter 6
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f6msk = 0b10;
+        }
+    }
+    else if( filter_num == CANBUS_FILTER_F7 )
+    {
+        if( mask_num == CANBUS_MASK_M0 )
+        {// Assign mask 0 to filter 7
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f7msk = 0b00;
+        }
+        else if( mask_num == CANBUS_MASK_M1 )
+        {// Assign mask 1 to filter 7
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f7msk = 0b01;
+        }
+        else
+        {// Assign mask 2 to filter 7
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f7msk = 0b10;
+        }
+    }
+    else if( filter_num == CANBUS_FILTER_F8 )
+    {
+        if( mask_num == CANBUS_MASK_M0 )
+        {// Assign mask 0 to filter 8
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f8msk = 0b00;
+        }
+        else if( mask_num == CANBUS_MASK_M1 )
+        {// Assign mask 1 to filter 8
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f8msk = 0b01;
+        }
+        else
+        {// Assign mask 2 to filter 8
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f8msk = 0b10;
+        }
+    }
+    else if( filter_num == CANBUS_FILTER_F9 )
+    {
+        if( mask_num == CANBUS_MASK_M0 )
+        {// Assign mask 0 to filter 9
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f9msk = 0b00;
+        }
+        else if( mask_num == CANBUS_MASK_M1 )
+        {// Assign mask 1 to filter 9
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f9msk = 0b01;
+        }
+        else
+        {// Assign mask 2 to filter 9
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f9msk = 0b10;
+        }
+    }
+    else if( filter_num == CANBUS_FILTER_F10 )
+    {
+        if( mask_num == CANBUS_MASK_M0 )
+        {// Assign mask 0 to filter 10
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f10msk = 0b00;
+        }
+        else if( mask_num == CANBUS_MASK_M1 )
+        {// Assign mask 1 to filter 10
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f10msk = 0b01;
+        }
+        else
+        {// Assign mask 2 to filter 10
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f10msk = 0b10;
+        }
+    }
+    else if( filter_num == CANBUS_FILTER_F11 )
+    {
+        if( mask_num == CANBUS_MASK_M0 )
+        {// Assign mask 0 to filter 11
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f11msk = 0b00;
+        }
+        else if( mask_num == CANBUS_MASK_M1 )
+        {// Assign mask 1 to filter 11
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f11msk = 0b01;
+        }
+        else
+        {// Assign mask 2 to filter 11
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f11msk = 0b10;
+        }
+    }
+    else if( filter_num == CANBUS_FILTER_F12 )
+    {
+        if( mask_num == CANBUS_MASK_M0 )
+        {// Assign mask 0 to filter 12
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f12msk = 0b00;
+        }
+        else if( mask_num == CANBUS_MASK_M1 )
+        {// Assign mask 1 to filter 12
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f12msk = 0b01;
+        }
+        else
+        {// Assign mask 2 to filter 12
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f12msk = 0b10;
+        }
+    }
+    else if( filter_num == CANBUS_FILTER_F13 )
+    {
+        if( mask_num == CANBUS_MASK_M0 )
+        {// Assign mask 0 to filter 13
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f13msk = 0b00;
+        }
+        else if( mask_num == CANBUS_MASK_M1 )
+        {// Assign mask 1 to filter 13
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f13msk = 0b01;
+        }
+        else
+        {// Assign mask 2 to filter 13
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f13msk = 0b10;
+        }
+    }
+    else if( filter_num == CANBUS_FILTER_F14 )
+    {
+        if( mask_num == CANBUS_MASK_M0 )
+        {// Assign mask 0 to filter 14
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f14msk = 0b00;
+        }
+        else if( mask_num == CANBUS_MASK_M1 )
+        {// Assign mask 1 to filter 14
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f14msk = 0b01;
+        }
+        else
+        {// Assign mask 2 to filter 14
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f14msk = 0b10;
+        }
+    }
+    else if( filter_num == CANBUS_FILTER_F15 )
+    {
+        if( mask_num == CANBUS_MASK_M0 )
+        {// Assign mask 0 to filter 15
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f15msk = 0b00;
+        }
+        else if( mask_num == CANBUS_MASK_M1 )
+        {// Assign mask 1 to filter 15
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f15msk = 0b01;
+        }
+        else
+        {// Assign mask 2 to filter 15
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f15msk = 0b10;
+        }
+    }
+    else if( filter_num == CANBUS_FILTER_ALL )
+    {
+        if( mask_num == CANBUS_MASK_M0 )
+        {// Assign mask 0 to filter 15
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f15msk = 0b00;
+        }
+        else if( mask_num == CANBUS_MASK_M1 )
+        {// Assign mask 1 to filter 15
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f15msk = 0b01;
+        }
+        else
+        {// Assign mask 2 to filter 15
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f15msk = 0b10;
+        }
+    }
+    else if( filter_num == CANBUS_FILTER_NONE )
+    {
+        // Do nothing
+    }
+    else
+    {// Catch-all for invalid input
+        // Switch to buffer window
+        ((canbus_cictrl1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCTRL1))->win = 0;
+
+        // Return an error
+        return CANBUS_E_INPUT;
+    }
+
+    // Switch to buffer window
+    ((canbus_cictrl1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCTRL1))->win = 0;
+
+    return CANBUS_E_NONE;
 }
 
 /**
@@ -1536,6 +1955,370 @@ static int canbus_set_filter(canbus_t *object,
                              canbus_filter_t filter_num,
                              canbus_header_t *filter_value)
 {
+    // Check for valid object
+    if( !canbus.is_valid(object) )
+    {// Object is invalid
+        return CANBUS_E_OBJECT;
+    }
+
+    // Switch to filter window
+    ((canbus_cictrl1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCTRL1))->win = 1;
+
+    if( filter_num == CANBUS_FILTER_F0 )
+    {// Set filter 0
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF0SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF0SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF0SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF0EID)) \
+            ->eid_l = filter_value->eid_l;
+    }
+    else if( filter_num == CANBUS_FILTER_F1 )
+    {// Set filter 1
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF1SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF1SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF1SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF1EID)) \
+            ->eid_l = filter_value->eid_l;
+    }
+    else if( filter_num == CANBUS_FILTER_F2 )
+    {// Set filter 2
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF2SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF2SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF2SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF2EID)) \
+            ->eid_l = filter_value->eid_l;
+    }
+    else if( filter_num == CANBUS_FILTER_F3 )
+    {// Set filter 3
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF3SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF3SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF3SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF3EID)) \
+            ->eid_l = filter_value->eid_l;
+    }
+    else if( filter_num == CANBUS_FILTER_F4 )
+    {// Set filter 4
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF4SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF4SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF4SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF4EID)) \
+            ->eid_l = filter_value->eid_l;
+    }
+    else if( filter_num == CANBUS_FILTER_F5 )
+    {// Set filter 5
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF5SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF5SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF5SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF5EID)) \
+            ->eid_l = filter_value->eid_l;
+    }
+    else if( filter_num == CANBUS_FILTER_F6 )
+    {// Set filter 6
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF6SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF6SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF6SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF6EID)) \
+            ->eid_l = filter_value->eid_l;
+    }
+    else if( filter_num == CANBUS_FILTER_F7 )
+    {// Set filter 7
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF7SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF7SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF7SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF7EID)) \
+            ->eid_l = filter_value->eid_l;
+    }
+    else if( filter_num == CANBUS_FILTER_F8 )
+    {// Set filter 8
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF8SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF8SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF8SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF8EID)) \
+            ->eid_l = filter_value->eid_l;
+    }
+    else if( filter_num == CANBUS_FILTER_F9 )
+    {// Set filter 9
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF9SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF9SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF9SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF9EID)) \
+            ->eid_l = filter_value->eid_l;
+    }
+    else if( filter_num == CANBUS_FILTER_F10 )
+    {// Set filter 10
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF10SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF10SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF10SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF10EID)) \
+            ->eid_l = filter_value->eid_l;
+    }
+    else if( filter_num == CANBUS_FILTER_F11 )
+    {// Set filter 11
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF11SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF11SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF11SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF11EID)) \
+            ->eid_l = filter_value->eid_l;
+    }
+    else if( filter_num == CANBUS_FILTER_F12 )
+    {// Set filter 12
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF12SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF12SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF12SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF12EID)) \
+            ->eid_l = filter_value->eid_l;
+    }
+    else if( filter_num == CANBUS_FILTER_F13 )
+    {// Set filter 13
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF13SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF13SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF13SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF13EID)) \
+            ->eid_l = filter_value->eid_l;
+    }
+    else if( filter_num == CANBUS_FILTER_F14 )
+    {// Set filter 14
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF14SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF14SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF14SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF14EID)) \
+            ->eid_l = filter_value->eid_l;
+    }
+    else if( filter_num == CANBUS_FILTER_F15 )
+    {// Set filter 15
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF15SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF15SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF15SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF15EID)) \
+            ->eid_l = filter_value->eid_l;
+    }
+    else if( filter_num == CANBUS_FILTER_ALL )
+    {// Set all filters
+        // Set filter 0
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF0SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF0SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF0SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF0EID)) \
+            ->eid_l = filter_value->eid_l;
+
+        // Set filter 1
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF1SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF1SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF1SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF1EID)) \
+            ->eid_l = filter_value->eid_l;
+
+        // Set filter 2
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF2SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF2SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF2SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF2EID)) \
+            ->eid_l = filter_value->eid_l;
+
+        // Set filter 3
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF3SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF3SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF3SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF3EID)) \
+            ->eid_l = filter_value->eid_l;
+
+        // Set filter 4
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF4SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF4SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF4SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF4EID)) \
+            ->eid_l = filter_value->eid_l;
+
+        // Set filter 5
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF5SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF5SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF5SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF5EID)) \
+            ->eid_l = filter_value->eid_l;
+
+        // Set filter 6
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF6SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF6SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF6SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF6EID)) \
+            ->eid_l = filter_value->eid_l;
+
+        // Set filter 7
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF7SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF7SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF7SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF7EID)) \
+            ->eid_l = filter_value->eid_l;
+
+        // Set filter 8
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF8SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF8SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF8SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF8EID)) \
+            ->eid_l = filter_value->eid_l;
+
+        // Set filter 9
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF9SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF9SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF9SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF9EID)) \
+            ->eid_l = filter_value->eid_l;
+
+        // Set filter 10
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF10SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF10SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF10SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF10EID)) \
+            ->eid_l = filter_value->eid_l;
+
+        // Set filter 11
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF11SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF11SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF11SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF11EID)) \
+            ->eid_l = filter_value->eid_l;
+
+        // Set filter 12
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF12SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF12SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF12SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF12EID)) \
+            ->eid_l = filter_value->eid_l;
+
+        // Set filter 13
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF13SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF13SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF13SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF13EID)) \
+            ->eid_l = filter_value->eid_l;
+
+        // Set filter 14
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF14SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF14SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF14SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF14EID)) \
+            ->eid_l = filter_value->eid_l;
+
+        // Set filter 15
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF15SID)) \
+            ->sid = filter_value->sid;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF15SID)) \
+            ->mide = filter_value->ide;
+        ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF15SID)) \
+            ->eid_h = filter_value->eid_h;
+        ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF15EID)) \
+            ->eid_l = filter_value->eid_l;
+    }
+    else if( filter_num == CANBUS_FILTER_NONE )
+    {
+        // Do nothing
+    }
+    else
+    {// Catch-all for invalid input
+        // Switch to buffer window
+        ((canbus_cictrl1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCTRL1))->win = 0;
+
+        // Return error
+        return CANBUS_E_INPUT;
+    }   
+    
+    // Switch to buffer window
+    ((canbus_cictrl1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCTRL1))->win = 0;
+
+    return CANBUS_E_NONE;
 }
 
 /**
