@@ -1592,28 +1592,11 @@ static int canbus_assign_mask(canbus_t *object,
         return CANBUS_E_INPUT;
     }
 
-    // Check for avlid filter_num input
-    // Filter must be F0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, or F15,
-    // not NONE (or something else)
-    if( !(filter_num == CANBUS_FILTER_F0        \
-          || filter_num == CANBUS_FILTER_F1     \
-          || filter_num == CANBUS_FILTER_F2     \
-          || filter_num == CANBUS_FILTER_F3     \
-          || filter_num == CANBUS_FILTER_F4     \
-          || filter_num == CANBUS_FILTER_F5     \
-          || filter_num == CANBUS_FILTER_F6     \
-          || filter_num == CANBUS_FILTER_F7     \
-          || filter_num == CANBUS_FILTER_F8     \
-          || filter_num == CANBUS_FILTER_F9     \
-          || filter_num == CANBUS_FILTER_F10    \
-          || filter_num == CANBUS_FILTER_F11    \
-          || filter_num == CANBUS_FILTER_F12    \
-          || filter_num == CANBUS_FILTER_F13    \
-          || filter_num == CANBUS_FILTER_F14    \
-          || filter_num == CANBUS_FILTER_F15    \
-          || filter_num == CANBUS_FILTER_ALL) )
-    {// Invalid input
-        return CANBUS_E_INPUT;
+    // If filter NONE is selected, do nothing
+    if( filter_num == CANBUS_FILTER_NONE )
+    {
+        // Do nothing
+        return CANBUS_E_NONE;
     }
 
     // Switch to filter window
@@ -1907,27 +1890,116 @@ static int canbus_assign_mask(canbus_t *object,
                                           + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f15msk = 0b10;
         }
     }
+    // Using an else if for this so that everytime we run the function we don't have to check every
+    // possible value. Most of the time filter_num will be a single filter not ALL, so this portion
+    // will only rarely be run
     else if( filter_num == CANBUS_FILTER_ALL )
     {
         if( mask_num == CANBUS_MASK_M0 )
-        {// Assign mask 0 to filter 15
+        {// Assign mask 0 to all filters
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f0msk = 0b00;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f1msk = 0b00;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f2msk = 0b00;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f3msk = 0b00;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f4msk = 0b00;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f5msk = 0b00;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f6msk = 0b00;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f7msk = 0b00;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f8msk = 0b00;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f9msk = 0b00;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f10msk = 0b00;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f11msk = 0b00;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f12msk = 0b00;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f13msk = 0b00;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f14msk = 0b00;
             ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
                                           + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f15msk = 0b00;
         }
         else if( mask_num == CANBUS_MASK_M1 )
-        {// Assign mask 1 to filter 15
+        {// Assign mask 1 to all filters
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f0msk = 0b01;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f1msk = 0b01;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f2msk = 0b01;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f3msk = 0b01;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f4msk = 0b01;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f5msk = 0b01;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f6msk = 0b01;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f7msk = 0b01;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f8msk = 0b01;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f9msk = 0b01;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f10msk = 0b01;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f11msk = 0b01;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f12msk = 0b01;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f13msk = 0b01;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f14msk = 0b01;
             ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
                                           + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f15msk = 0b01;
         }
         else
-        {// Assign mask 2 to filter 15
+        {// Assign mask 2 to all filters
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f0msk = 0b10;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f1msk = 0b10;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f2msk = 0b10;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f3msk = 0b10;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f4msk = 0b10;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f5msk = 0b10;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f6msk = 0b10;
+            ((canbus_cifmsksel1_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL1))->f7msk = 0b10;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f8msk = 0b10;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f9msk = 0b10;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f10msk = 0b10;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f11msk = 0b10;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f12msk = 0b10;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f13msk = 0b10;
+            ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
+                                          + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f14msk = 0b10;
             ((canbus_cifmsksel2_bits_t *)(CANBUS_BASE_ADDRESS(object)   \
                                           + CANBUS_SFR_OFFSET_CiFMSKSEL2))->f15msk = 0b10;
         }
-    }
-    else if( filter_num == CANBUS_FILTER_NONE )
-    {
-        // Do nothing
     }
     else
     {// Catch-all for invalid input
