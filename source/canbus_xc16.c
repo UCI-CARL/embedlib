@@ -2033,6 +2033,13 @@ static int canbus_set_filter(canbus_t *object,
         return CANBUS_E_OBJECT;
     }
 
+    // If NONE, then do nothing and exit
+    if( filter_num == CANBUS_FILTER_NONE )
+    {
+        // Do nothing
+        return CANBUS_E_NONE;
+    }
+
     // Switch to filter window
     ((canbus_cictrl1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCTRL1))->win = 1;
 
@@ -2212,6 +2219,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF15EID)) \
             ->eid_l = filter_value->eid_l;
     }
+    // Using an else if for this so that everytime we run the function we don't have to check every
+    // possible value. Most of the time filter_num will be a single filter not ALL, so this portion
+    // will only rarely be run
     else if( filter_num == CANBUS_FILTER_ALL )
     {// Set all filters
         // Set filter 0
@@ -2374,10 +2384,6 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF15EID)) \
             ->eid_l = filter_value->eid_l;
     }
-    else if( filter_num == CANBUS_FILTER_NONE )
-    {
-        // Do nothing
-    }
     else
     {// Catch-all for invalid input
         // Switch to buffer window
@@ -2409,6 +2415,211 @@ static int canbus_set_buffer_pointer(canbus_t *object,
                                      canbus_filter_t filter_num,
                                      canbus_buffer_t buffer_num)
 {
+    unsigned int buffer_pointer_value = 0;
+    
+    // Check for valid object
+    if( !canbus.is_valid(object) )
+    {// Object is invalid
+        return CANBUS_E_OBJECT;
+    }
+
+    // If NONE, then do nothing and exit
+    if( filter_num == CANBUS_FILTER_NONE )
+    {
+        return CANBUS_E_NONE;
+    }
+
+    // Determine buffer pointer value
+    // Only buffers 0-14 and FIFO are valid, cannot be buffers 15-31 or ALL or NONE
+    switch( buffer_num )
+    {
+    case CANBUS_BUFFER_B0:
+        buffer_pointer_value = 0x0000;
+        break;
+    case CANBUS_BUFFER_B1:
+        buffer_pointer_value = 0x0001;
+        break;
+    case CANBUS_BUFFER_B2:
+        buffer_pointer_value = 0x0002;
+        break;
+    case CANBUS_BUFFER_B3:
+        buffer_pointer_value = 0x0003;
+        break;
+    case CANBUS_BUFFER_B4:
+        buffer_pointer_value = 0x0004;
+        break;
+    case CANBUS_BUFFER_B5:
+        buffer_pointer_value = 0x0005;
+        break;
+    case CANBUS_BUFFER_B6:
+        buffer_pointer_value = 0x0006;
+        break;
+    case CANBUS_BUFFER_B7:
+        buffer_pointer_value = 0x0007;
+        break;
+    case CANBUS_BUFFER_B8:
+        buffer_pointer_value = 0x0008;
+        break;
+    case CANBUS_BUFFER_B9:
+        buffer_pointer_value = 0x0009;
+        break;
+    case CANBUS_BUFFER_B10:
+        buffer_pointer_value = 0x000A;
+        break;
+    case CANBUS_BUFFER_B11:
+        buffer_pointer_value = 0x000B;
+        break;
+    case CANBUS_BUFFER_B12:
+        buffer_pointer_value = 0x000C;
+        break;
+    case CANBUS_BUFFER_B13:
+        buffer_pointer_value = 0x000D;
+        break;
+    case CANBUS_BUFFER_B14:
+        buffer_pointer_value = 0x000E;
+        break;
+    case CANBUS_BUFFER_FIFO:
+        buffer_pointer_value = 0x000F;
+        break;
+    default:
+        // Invalid input
+        return CANBUS_E_INPUT;
+    }
+
+    // Switch to filter window
+    ((canbus_cictrl1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCTRL1))->win = 1;
+
+    // Set filter_num to point to buffer_num
+    if( filter_num == CANBUS_FILTER_F0 )
+    {// Set filter 0 buffer pointer
+        ((canbus_cibufpnt1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT1)) \
+            ->f0bp = buffer_pointer_value;
+    }
+    else if( filter_num == CANBUS_FILTER_F1 )
+    {// Set filter 1 buffer pointer
+        ((canbus_cibufpnt1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT1)) \
+            ->f1bp = buffer_pointer_value;
+    }
+    else if( filter_num == CANBUS_FILTER_F2 )
+    {// Set filter 2 buffer pointer
+        ((canbus_cibufpnt1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT1)) \
+            ->f2bp = buffer_pointer_value;
+    }
+    else if( filter_num == CANBUS_FILTER_F3 )
+    {// Set filter 3 buffer pointer
+        ((canbus_cibufpnt1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT1)) \
+            ->f3bp = buffer_pointer_value;
+    }
+    else if( filter_num == CANBUS_FILTER_F4 )
+    {// Set filter 4 buffer pointer
+        ((canbus_cibufpnt2_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT2)) \
+            ->f4bp = buffer_pointer_value;
+    }
+    else if( filter_num == CANBUS_FILTER_F5 )
+    {// Set filter 5 buffer pointer
+        ((canbus_cibufpnt2_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT2)) \
+            ->f5bp = buffer_pointer_value;
+    }
+    else if( filter_num == CANBUS_FILTER_F6 )
+    {// Set filter 6 buffer pointer
+        ((canbus_cibufpnt2_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT2)) \
+            ->f6bp = buffer_pointer_value;
+    }
+    else if( filter_num == CANBUS_FILTER_F7 )
+    {// Set filter 7 buffer pointer
+        ((canbus_cibufpnt2_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT2)) \
+            ->f7bp = buffer_pointer_value;
+    }
+    else if( filter_num == CANBUS_FILTER_F8 )
+    {// Set filter 8 buffer pointer
+        ((canbus_cibufpnt3_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT3)) \
+            ->f8bp = buffer_pointer_value;
+    }
+    else if( filter_num == CANBUS_FILTER_F9 )
+    {// Set filter 9 buffer pointer
+        ((canbus_cibufpnt3_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT3)) \
+            ->f9bp = buffer_pointer_value;
+    }
+    else if( filter_num == CANBUS_FILTER_F10 )
+    {// Set filter 10 buffer pointer
+        ((canbus_cibufpnt3_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT3)) \
+            ->f10bp = buffer_pointer_value;
+    }
+    else if( filter_num == CANBUS_FILTER_F11 )
+    {// Set filter 11 buffer pointer
+        ((canbus_cibufpnt3_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT3)) \
+            ->f11bp = buffer_pointer_value;
+    }
+    else if( filter_num == CANBUS_FILTER_F12 )
+    {// Set filter 12 buffer pointer
+        ((canbus_cibufpnt4_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT4)) \
+            ->f12bp = buffer_pointer_value;
+    }
+    else if( filter_num == CANBUS_FILTER_F13 )
+    {// Set filter 13 buffer pointer
+        ((canbus_cibufpnt4_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT4)) \
+            ->f13bp = buffer_pointer_value;
+    }
+    else if( filter_num == CANBUS_FILTER_F14 )
+    {// Set filter 14 buffer pointer
+        ((canbus_cibufpnt4_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT4)) \
+            ->f14bp = buffer_pointer_value;
+    }
+    else if( filter_num == CANBUS_FILTER_F15 )
+    {// Set filter 15 buffer pointer
+        ((canbus_cibufpnt4_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT4)) \
+            ->f15bp = buffer_pointer_value;
+    }
+    // Using an else if for this so that everytime we run the function we don't have to check every
+    // possible value. Most of the time filter_num will be a single filter not ALL, so this portion
+    // will only rarely be run
+    else if( filter_num == CANBUS_FILTER_ALL )
+    {// Point all filters at buffer_num
+        ((canbus_cibufpnt1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT1)) \
+            ->f0bp = buffer_pointer_value;
+        ((canbus_cibufpnt1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT1)) \
+            ->f1bp = buffer_pointer_value;
+        ((canbus_cibufpnt1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT1)) \
+            ->f2bp = buffer_pointer_value;
+        ((canbus_cibufpnt1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT1)) \
+            ->f3bp = buffer_pointer_value;
+        ((canbus_cibufpnt2_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT2)) \
+            ->f4bp = buffer_pointer_value;
+        ((canbus_cibufpnt2_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT2)) \
+            ->f5bp = buffer_pointer_value;
+        ((canbus_cibufpnt2_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT2)) \
+            ->f6bp = buffer_pointer_value;
+        ((canbus_cibufpnt2_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT2)) \
+            ->f7bp = buffer_pointer_value;
+        ((canbus_cibufpnt3_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT3)) \
+            ->f8bp = buffer_pointer_value;
+        ((canbus_cibufpnt3_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT3)) \
+            ->f9bp = buffer_pointer_value;
+        ((canbus_cibufpnt3_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT3)) \
+            ->f10bp = buffer_pointer_value;
+        ((canbus_cibufpnt3_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT3)) \
+            ->f11bp = buffer_pointer_value;
+        ((canbus_cibufpnt4_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT4)) \
+            ->f12bp = buffer_pointer_value;
+        ((canbus_cibufpnt4_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT4)) \
+            ->f13bp = buffer_pointer_value;
+        ((canbus_cibufpnt4_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT4)) \
+            ->f14bp = buffer_pointer_value;
+        ((canbus_cibufpnt4_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiBUFPNT4)) \
+            ->f15bp = buffer_pointer_value;
+    }
+    else
+    {// Catch-all for invalid input
+        // Switch to buffer window
+        ((canbus_cictrl1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCTRL1))->win = 0;
+        // Return an error
+        return CANBUS_E_INPUT;
+    }
+
+    // Switch to buffer window
+    ((canbus_cictrl1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCTRL1))->win = 0;
+    
+    return CANBUS_E_NONE;    
 }
 
 /**
