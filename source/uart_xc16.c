@@ -43,7 +43,7 @@
 /**
  * @todo move to .def file.
  */
-#define UART_DEF_LOCAL_ADDR_SIZE 8 /**< The maximum size of the _local_addr array */
+#define UART_DEF_LOCAL_ADDR_SIZE 8 /**< The maximum size of the local_addr_ array */
 
 /* ***** Private Macros ***** */
 
@@ -52,14 +52,14 @@
  *
  * @private
  */
-#define UART_GET_BASE_ADDRESS(module) ( ((uart_private_t *)((module)->private))->_base_address )
+#define UART_GET_BASE_ADDRESS(module) ( ((uart_private_t *)((module)->private))->base_address_ )
 
 /**
  * @brief Return the #_attr struct stored in the private object of the given UART module.
  *
  * @private
  */
-#define UART_GET_ATTR(module) ( ((uart_private_t *)((module)->private))->_attr )
+#define UART_GET_ATTR(module) ( ((uart_private_t *)((module)->private))->attr_ )
 
 /* ***** Private Constants ***** */
 
@@ -168,7 +168,7 @@ typedef struct uart_private_s
      * @see uart_attr_t
      * @private
      */
-    uart_attr_t _attr;
+    uart_attr_t attr_;
 
     /**
      * @brief The #_base_address points to the starting address of the current UART module.
@@ -179,7 +179,7 @@ typedef struct uart_private_s
      *
      * @private
      */
-    volatile unsigned int *_base_address;
+    volatile unsigned int *base_address_;
 
     /**
      * @brief The #_tx_dma pointer points to the user supplied DMA channel which should be used for
@@ -192,7 +192,7 @@ typedef struct uart_private_s
      * @see dma_channel_t
      * @private
      */
-    dma_channel_t *_tx_dma;
+    dma_channel_t *tx_dma_;
 
     /**
      * @brief The #_rx_dma pointer points to the user supplied DMA channel which should be used for
@@ -205,7 +205,7 @@ typedef struct uart_private_s
      * @see dma_channel_t
      * @private
      */
-    dma_channel_t *_rx_dma;
+    dma_channel_t *rx_dma_;
 
     /**
      * @brief The baud rate used by the module for transmission and reception of characters.
@@ -216,7 +216,7 @@ typedef struct uart_private_s
      * @see uart_baudrate_t
      * @private
      */
-    uart_baudrate_t _baudrate;
+    uart_baudrate_t baudrate_;
 
     /**
      * @brief The current open state of the module, either RX only, TX and RX, or none.
@@ -228,37 +228,34 @@ typedef struct uart_private_s
      * @see uart_direction_t
      * @private
      */
-    uart_direction_t _open_state;
-
-    dma_channel_t *_tx_dma;
-    dma_channel_t *_rx_dma;
+    uart_direction_t open_state_;
     
-    void *_tx_buffer; /**< A pointer to the software TX buffer (either char or int). @private */
-    void *_tx_head;   /**< A pointer to the last write into the TX software buffer. @private */
-    void *_tx_tail;   /**< A pointer to the last read out of the TX software buffer. @private */
+    void *tx_buffer_; /**< A pointer to the software TX buffer (either char or int). @private */
+    void *tx_head_;   /**< A pointer to the last write into the TX software buffer. @private */
+    void *tx_tail_;   /**< A pointer to the last read out of the TX software buffer. @private */
 
-    void *_rx_buffer; /**< A pointer to the software RX buffer (either char or int). @private */
-    void *_rx_head;   /**< A pointer to the last write into the RX software buffer. @private */
-    void *_rx_tail;   /**< A pointer to the last read out of the RX software buffer. @private */
+    void *rx_buffer_; /**< A pointer to the software RX buffer (either char or int). @private */
+    void *rx_head_;   /**< A pointer to the last write into the RX software buffer. @private */
+    void *rx_tail_;   /**< A pointer to the last read out of the RX software buffer. @private */
 
-    char *_local_addr; /**< An array of addresses to accept in 9-bit, masked mode. @private */
-    int _local_addr_length; /**< The length of the _local_addr array. @private */
+    char *local_addr_; /**< An array of addresses to accept in 9-bit, masked mode. @private */
+    int local_addr_length_; /**< The length of the local_addr_ array. @private */
 
-    int (*_write)(uart_module_t *module,
+    int (*write_)(uart_module_t *module,
                   const void *buffer,
                   unsigned int length);
 
-    int (*_read)(uart_module_t *module,
+    int (*read_)(uart_module_t *module,
                  void *buffer,
                  unsigned int length);
 
-    int (*_flush_tx)(uart_module_t *module);
+    int (*flush_tx_)(uart_module_t *module);
 
-    int (*_flush_rx)(uart_module_t *module);
+    int (*flush_rx_)(uart_module_t *module);
 
-    void (*_tx_isr)(uart_module_t *module);
+    void (*tx_isr_)(uart_module_t *module);
 
-    void (*_rx_isr)(uart_module_t *module);
+    void (*rx_isr_)(uart_module_t *module);
     
 } uart_private_t;
 
@@ -918,7 +915,8 @@ int uart_init(uart_module_t *module,
     }
 
 #if (UART_HW_NUMBER_OF_MODULES < 1) || (UART_HW_NUMBER_OF_MODULES > 4)
-#error "UART(__file__,__line__): UART_HW_NUMBER_OF_MODULES is out of bounds. The UART library is expecting a number between 1 and 4."
+#error "UART(__file__,__line__): UART_HW_NUMBER_OF_MODULES is out of bounds. The UART library is \
+expecting a number between 1 and 4."
 #endif
     switch(module->uart_number)
     {
@@ -949,15 +947,15 @@ int uart_init(uart_module_t *module,
     }
 
     // Save the attr struct to the private data object
-    ((uart_private_t *)module->private)->_attr = *attr;
+    ((uart_private_t *)module->private)->attr_ = *attr;
 
     // Set all SFRs to default values (see datasheet for default values)
     *(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxMODE) = UART_SFR_DEFAULT_UxMODE;
     *(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxSTA)  = UART_SFR_DEFAULT_UxSTA;
     *(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxBRG)  = UART_SFR_DEFAULT_UxBRG;
 
-    // Set _baudrate to valid value
-    ((uart_private_t *)module->private)->_baudrate = UART_BAUDRATE_UNKNOWN;
+    // Set baudrate_ to valid value
+    ((uart_private_t *)module->private)->baudrate_ = UART_BAUDRATE_UNKNOWN;
 
 
     
@@ -1034,20 +1032,20 @@ int uart_init(uart_module_t *module,
 
         // Select minor mode (addressing)
         if( (UART_GET_ATTR(module).mode_settings & UART_MINOR_MODE_BITMASK) == UART_MINOR_MODE_9BIT_ADDR_MASK )
-        {// 9-bit mode, 9th bit marks address byte, mask data according to _local_addr array
+        {// 9-bit mode, 9th bit marks address byte, mask data according to local_addr_ array
             // Enable address character detection
             WRITE_MASK_SET(*(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxSTA), UART_SFR_BITMASK_ADDEN);
 
             // Allocate UART_DEF_LOCAL_ADDRESS_MAX number addresses
-            ((uart_private_t *)module->private)->_local_addr = malloc(sizeof(char)*UART_DEF_LOCAL_ADDR_SIZE);
-            if( ((uart_private_t *)(module->private))->_local_addr == NULL )
+            ((uart_private_t *)module->private)->local_addr_ = malloc(sizeof(char)*UART_DEF_LOCAL_ADDR_SIZE);
+            if( ((uart_private_t *)(module->private))->local_addr_ == NULL )
             {// Allocation failed
                 // Return to an uninitialized state, free memory, and return an error code
                 uart_cleanup(module);
                 return UART_E_ALLOC;
             }
             
-            ((uart_private_t *)module->private)->_local_addr_length = 0;
+            ((uart_private_t *)module->private)->local_addr_length_ = 0;
         }
         else if( (UART_GET_ATTR(module).mode_settings & UART_MINOR_MODE_BITMASK) == UART_MINOR_MODE_9BIT_ADDR_PROM )
         {// 9-bit mode, 9th bit marks address byte, promiscuous mode
@@ -1148,7 +1146,7 @@ int uart_init(uart_module_t *module,
         }
 
         // Copy DMA channel to private object
-        ((uart_private_t *)module->private)->_tx_dma = tx_dma;
+        ((uart_private_t *)module->private)->tx_dma_ = tx_dma;
 
         /**
          * @todo Set up TX DMA buffer.
@@ -1201,7 +1199,7 @@ int uart_init(uart_module_t *module,
         {// Using 9-bit mode, allocate a word for each character
             
             // Allocate TX buffer
-            ((uart_private_t *)module->private)->_tx_buffer \
+            ((uart_private_t *)module->private)->tx_buffer_ \
                 = malloc(sizeof(int)*buffer_size);
         }
         else if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_LIN )
@@ -1214,22 +1212,22 @@ int uart_init(uart_module_t *module,
         {// Default to using standard (8-bit) mode, allocate a byte for each character
             
             // Allocate TX buffer
-            ((uart_private_t *)module->private)->_tx_buffer \
+            ((uart_private_t *)module->private)->tx_buffer_ \
                 = malloc(sizeof(char)*buffer_size);
         }
 
         // Check for failed allocation
-        if( ((uart_private_t *)module->private)->_tx_buffer == NULL )
+        if( ((uart_private_t *)module->private)->tx_buffer_ == NULL )
         {// Allocation failed
             uart_cleanup(module);
             return UART_E_ALLOC;
         }
         
         // Set read and write pointers
-        ((uart_private_t *)module->private)->_tx_head \
-            = ((uart_private_t *)module->private)->_tx_buffer;
-        ((uart_private_t *)module->private)->_tx_tail \
-            = ((uart_private_t *)module->private)->_tx_buffer;
+        ((uart_private_t *)module->private)->tx_head_ \
+            = ((uart_private_t *)module->private)->tx_buffer_;
+        ((uart_private_t *)module->private)->tx_tail_ \
+            = ((uart_private_t *)module->private)->tx_buffer_;
                 
         break;
     case UART_TX_BUFFER_MODE_HYBRID:
@@ -1243,7 +1241,7 @@ int uart_init(uart_module_t *module,
         }
 
         // Copy pointer to DMA channel to private object
-        ((uart_private_t *)module->private)->_tx_dma = tx_dma;
+        ((uart_private_t *)module->private)->tx_dma_ = tx_dma;
 
         /**
          * @todo Set up TX DMA buffer.
@@ -1283,7 +1281,7 @@ int uart_init(uart_module_t *module,
         case UART_TX_BUFFER_SIZE_MATCH:
         default:
             // Software buffer tries to match DMA buffer length
-            buffer_size = ((uart_private_t *)module->private)->_tx_dma->buffer_a_size;
+            buffer_size = ((uart_private_t *)module->private)->tx_dma_->buffer_a_size;
             break;
         }
 
@@ -1292,7 +1290,7 @@ int uart_init(uart_module_t *module,
         {// Using 9-bit mode, allocate a word for each character
             
             // Allocate TX buffer
-            ((uart_private_t *)module->private)->_tx_buffer \
+            ((uart_private_t *)module->private)->tx_buffer_ \
                 = malloc(sizeof(int)*buffer_size);
         }
         else if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_LIN )
@@ -1305,22 +1303,22 @@ int uart_init(uart_module_t *module,
         {// Default to using standard (8-bit) mode, allocate a byte for each character
             
             // Allocate TX buffer
-            ((uart_private_t *)module->private)->_tx_buffer \
+            ((uart_private_t *)module->private)->tx_buffer_ \
                 = malloc(sizeof(char)*buffer_size);
         }
 
         // Check for failed allocation
-        if( ((uart_private_t *)module->private)->_tx_buffer == NULL )
+        if( ((uart_private_t *)module->private)->tx_buffer_ == NULL )
         {// Allocation failed
             uart_cleanup(module);
             return UART_E_ALLOC;
         }
         
         // Set read and write pointers
-        ((uart_private_t *)module->private)->_tx_head \
-            = ((uart_private_t *)module->private)->_tx_buffer;
-        ((uart_private_t *)module->private)->_tx_tail \
-            = ((uart_private_t *)module->private)->_tx_buffer;
+        ((uart_private_t *)module->private)->tx_head_ \
+            = ((uart_private_t *)module->private)->tx_buffer_;
+        ((uart_private_t *)module->private)->tx_tail_ \
+            = ((uart_private_t *)module->private)->tx_buffer_;
         
         break;
     case UART_TX_BUFFER_MODE_HWONLY:
@@ -1347,7 +1345,7 @@ int uart_init(uart_module_t *module,
         }
 
         // Copy DMA channel to private object
-        ((uart_private_t *)module->private)->_rx_dma = rx_dma;
+        ((uart_private_t *)module->private)->rx_dma_ = rx_dma;
 
         /**
          * @todo Set up RX DMA buffer.
@@ -1400,7 +1398,7 @@ int uart_init(uart_module_t *module,
         {// Using 9-bit mode, allocate a word for each character
             
             // Allocate RX buffer
-            ((uart_private_t *)module->private)->_rx_buffer \
+            ((uart_private_t *)module->private)->rx_buffer_ \
                 = malloc(sizeof(int)*buffer_size);
         }
         else if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_LIN )
@@ -1413,22 +1411,22 @@ int uart_init(uart_module_t *module,
         {// Default to using standard (8-bit) mode, allocate a byte for each character
             
             // Allocate RX buffer
-            ((uart_private_t *)module->private)->_rx_buffer \
+            ((uart_private_t *)module->private)->rx_buffer_ \
                 = malloc(sizeof(char)*buffer_size);
         }
 
         // Check for failed allocation
-        if( ((uart_private_t *)module->private)->_rx_buffer == NULL )
+        if( ((uart_private_t *)module->private)->rx_buffer_ == NULL )
         {// Allocation failed
             uart_cleanup(module);
             return UART_E_ALLOC;
         }
         
         // Set read and write pointers
-        ((uart_private_t *)module->private)->_rx_head \
-            = ((uart_private_t *)module->private)->_rx_buffer;
-        ((uart_private_t *)module->private)->_rx_tail \
-            = ((uart_private_t *)module->private)->_rx_buffer;
+        ((uart_private_t *)module->private)->rx_head_ \
+            = ((uart_private_t *)module->private)->rx_buffer_;
+        ((uart_private_t *)module->private)->rx_tail_ \
+            = ((uart_private_t *)module->private)->rx_buffer_;
                 
         break;
     case UART_RX_BUFFER_MODE_HYBRID:
@@ -1442,7 +1440,7 @@ int uart_init(uart_module_t *module,
         }
 
         // Copy pointer to DMA channel to private object
-        ((uart_private_t *)module->private)->_rx_dma = rx_dma;
+        ((uart_private_t *)module->private)->rx_dma_ = rx_dma;
 
         /**
          * @todo Set up RX DMA buffer.
@@ -1482,7 +1480,7 @@ int uart_init(uart_module_t *module,
         case UART_RX_BUFFER_SIZE_MATCH:
         default:
             // Software buffer tries to match DMA buffer length
-            buffer_size = ((uart_private_t *)module->private)->_rx_dma->buffer_a_size;
+            buffer_size = ((uart_private_t *)module->private)->rx_dma_->buffer_a_size;
             break;
         }
 
@@ -1491,7 +1489,7 @@ int uart_init(uart_module_t *module,
         {// Using 9-bit mode, allocate a word for each character
             
             // Allocate TX buffer
-            ((uart_private_t *)module->private)->_rx_buffer \
+            ((uart_private_t *)module->private)->rx_buffer_ \
                 = malloc(sizeof(int)*buffer_size);
         }
         else if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_LIN )
@@ -1504,22 +1502,22 @@ int uart_init(uart_module_t *module,
         {// Default to using standard (8-bit) mode, allocate a byte for each character
             
             // Allocate RX buffer
-            ((uart_private_t *)module->private)->_rx_buffer \
+            ((uart_private_t *)module->private)->rx_buffer_ \
                 = malloc(sizeof(char)*buffer_size);
         }
 
         // Check for failed allocation
-        if( ((uart_private_t *)module->private)->_rx_buffer == NULL )
+        if( ((uart_private_t *)module->private)->rx_buffer_ == NULL )
         {// Allocation failed
             uart_cleanup(module);
             return UART_E_ALLOC;
         }
         
         // Set read and write pointers
-        ((uart_private_t *)module->private)->_rx_head \
-            = ((uart_private_t *)module->private)->_rx_buffer;
-        ((uart_private_t *)module->private)->_rx_tail \
-            = ((uart_private_t *)module->private)->_rx_buffer;
+        ((uart_private_t *)module->private)->rx_head_ \
+            = ((uart_private_t *)module->private)->rx_buffer_;
+        ((uart_private_t *)module->private)->rx_tail_ \
+            = ((uart_private_t *)module->private)->rx_buffer_;
         
         break;
     case UART_RX_BUFFER_MODE_HWONLY:
@@ -1540,19 +1538,19 @@ int uart_init(uart_module_t *module,
         // Check what major mode is in use
         if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_9BIT )
         {// Using 9-bit mode
-            ((uart_private_t *)module->private)->_write = &uart_private_write_9bit_hwonly;
+            ((uart_private_t *)module->private)->write_ = &uart_private_write_9bit_hwonly;
         }
         else if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_LIN )
         {// Using LIN mode
-            ((uart_private_t *)module->private)->_write = &uart_private_write_lin_hwonly;
+            ((uart_private_t *)module->private)->write_ = &uart_private_write_lin_hwonly;
         }
         else
         {// Default to using standard (8-bit) mode, allocate a byte for each character
-            ((uart_private_t *)module->private)->_write = &uart_private_write_8bit_hwonly;
+            ((uart_private_t *)module->private)->write_ = &uart_private_write_8bit_hwonly;
         }
 
-        ((uart_private_t *)module->private)->_flush_tx = &uart_private_flush_tx_hwonly;
-        ((uart_private_t *)module->private)->_tx_isr = &uart_private_tx_isr_hwonly;
+        ((uart_private_t *)module->private)->flush_tx_ = &uart_private_flush_tx_hwonly;
+        ((uart_private_t *)module->private)->tx_isr_ = &uart_private_tx_isr_hwonly;
 
         break;
     case UART_TX_BUFFER_MODE_DMA:
@@ -1560,19 +1558,19 @@ int uart_init(uart_module_t *module,
         // Check what major mode is in use
         if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_9BIT )
         {// Using 9-bit mode
-            ((uart_private_t *)module->private)->_write = &uart_private_write_9bit_dma;
+            ((uart_private_t *)module->private)->write_ = &uart_private_write_9bit_dma;
         }
         else if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_LIN )
         {// Using LIN mode
-            ((uart_private_t *)module->private)->_write = &uart_private_write_lin_dma;
+            ((uart_private_t *)module->private)->write_ = &uart_private_write_lin_dma;
         }
         else
         {// Default to using standard (8-bit) mode, allocate a byte for each character
-            ((uart_private_t *)module->private)->_write = &uart_private_write_8bit_dma;
+            ((uart_private_t *)module->private)->write_ = &uart_private_write_8bit_dma;
         }
 
-        ((uart_private_t *)module->private)->_flush_tx = &uart_private_flush_tx_dma;
-        ((uart_private_t *)module->private)->_tx_isr = &uart_private_tx_isr_dma;
+        ((uart_private_t *)module->private)->flush_tx_ = &uart_private_flush_tx_dma;
+        ((uart_private_t *)module->private)->tx_isr_ = &uart_private_tx_isr_dma;
 
         break;
     case UART_TX_BUFFER_MODE_SOFT:
@@ -1580,19 +1578,19 @@ int uart_init(uart_module_t *module,
         // Check what major mode is in use
         if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_9BIT )
         {// Using 9-bit mode
-            ((uart_private_t *)module->private)->_write = &uart_private_write_9bit_soft;
+            ((uart_private_t *)module->private)->write_ = &uart_private_write_9bit_soft;
         }
         else if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_LIN )
         {// Using LIN mode
-            ((uart_private_t *)module->private)->_write = &uart_private_write_lin_soft;
+            ((uart_private_t *)module->private)->write_ = &uart_private_write_lin_soft;
         }
         else
         {// Default to using standard (8-bit) mode, allocate a byte for each character
-            ((uart_private_t *)module->private)->_write = &uart_private_write_8bit_soft;
+            ((uart_private_t *)module->private)->write_ = &uart_private_write_8bit_soft;
         }
 
-        ((uart_private_t *)module->private)->_flush_tx = &uart_private_flush_tx_soft;
-        ((uart_private_t *)module->private)->_tx_isr = &uart_private_tx_isr_soft;
+        ((uart_private_t *)module->private)->flush_tx_ = &uart_private_flush_tx_soft;
+        ((uart_private_t *)module->private)->tx_isr_ = &uart_private_tx_isr_soft;
 
         break;
     case UART_TX_BUFFER_MODE_HYBRID:
@@ -1600,19 +1598,19 @@ int uart_init(uart_module_t *module,
         // Check what major mode is in use
         if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_9BIT )
         {// Using 9-bit mode
-            ((uart_private_t *)module->private)->_write = &uart_private_write_9bit_hybrid;
+            ((uart_private_t *)module->private)->write_ = &uart_private_write_9bit_hybrid;
         }
         else if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_LIN )
         {// Using LIN mode
-            ((uart_private_t *)module->private)->_write = &uart_private_write_lin_hybrid;
+            ((uart_private_t *)module->private)->write_ = &uart_private_write_lin_hybrid;
         }
         else
         {// Default to using standard (8-bit) mode, allocate a byte for each character
-            ((uart_private_t *)module->private)->_write = &uart_private_write_8bit_hybrid;
+            ((uart_private_t *)module->private)->write_ = &uart_private_write_8bit_hybrid;
         }
 
-        ((uart_private_t *)module->private)->_flush_tx = &uart_private_flush_tx_hybrid;
-        ((uart_private_t *)module->private)->_tx_isr = &uart_private_tx_isr_hybrid;
+        ((uart_private_t *)module->private)->flush_tx_ = &uart_private_flush_tx_hybrid;
+        ((uart_private_t *)module->private)->tx_isr_ = &uart_private_tx_isr_hybrid;
 
         break;
     default:
@@ -1629,19 +1627,19 @@ int uart_init(uart_module_t *module,
         // Check what major mode is in use
         if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_9BIT )
         {// Using 9-bit mode
-            ((uart_private_t *)module->private)->_read = &uart_private_read_9bit_hwonly;
+            ((uart_private_t *)module->private)->read_ = &uart_private_read_9bit_hwonly;
         }
         else if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_LIN )
         {// Using LIN mode
-            ((uart_private_t *)module->private)->_read = &uart_private_read_lin_hwonly;
+            ((uart_private_t *)module->private)->read_ = &uart_private_read_lin_hwonly;
         }
         else
         {// Default to using standard (8-bit) mode, allocate a byte for each character
-            ((uart_private_t *)module->private)->_read = &uart_private_read_8bit_hwonly;
+            ((uart_private_t *)module->private)->read_ = &uart_private_read_8bit_hwonly;
         }
 
-        ((uart_private_t *)module->private)->_flush_rx = &uart_private_flush_rx_hwonly;
-        ((uart_private_t *)module->private)->_rx_isr = &uart_private_rx_isr_hwonly;
+        ((uart_private_t *)module->private)->flush_rx_ = &uart_private_flush_rx_hwonly;
+        ((uart_private_t *)module->private)->rx_isr_ = &uart_private_rx_isr_hwonly;
 
         break;
     case UART_RX_BUFFER_MODE_DMA:
@@ -1649,19 +1647,19 @@ int uart_init(uart_module_t *module,
         // Check what major mode is in use
         if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_9BIT )
         {// Using 9-bit mode
-            ((uart_private_t *)module->private)->_read = &uart_private_read_9bit_dma;
+            ((uart_private_t *)module->private)->read_ = &uart_private_read_9bit_dma;
         }
         else if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_LIN )
         {// Using LIN mode
-            ((uart_private_t *)module->private)->_read = &uart_private_read_lin_dma;
+            ((uart_private_t *)module->private)->read_ = &uart_private_read_lin_dma;
         }
         else
         {// Default to using standard (8-bit) mode, allocate a byte for each character
-            ((uart_private_t *)module->private)->_read = &uart_private_read_8bit_dma;
+            ((uart_private_t *)module->private)->read_ = &uart_private_read_8bit_dma;
         }
 
-        ((uart_private_t *)module->private)->_flush_rx = &uart_private_flush_rx_dma;
-        ((uart_private_t *)module->private)->_rx_isr = &uart_private_rx_isr_dma;
+        ((uart_private_t *)module->private)->flush_rx_ = &uart_private_flush_rx_dma;
+        ((uart_private_t *)module->private)->rx_isr_ = &uart_private_rx_isr_dma;
 
         break;
     case UART_RX_BUFFER_MODE_SOFT:
@@ -1669,19 +1667,19 @@ int uart_init(uart_module_t *module,
         // Check what major mode is in use
         if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_9BIT )
         {// Using 9-bit mode
-            ((uart_private_t *)module->private)->_read = &uart_private_read_9bit_soft;
+            ((uart_private_t *)module->private)->read_ = &uart_private_read_9bit_soft;
         }
         else if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_LIN )
         {// Using LIN mode
-            ((uart_private_t *)module->private)->_read = &uart_private_read_lin_soft;
+            ((uart_private_t *)module->private)->read_ = &uart_private_read_lin_soft;
         }
         else
         {// Default to using standard (8-bit) mode, allocate a byte for each character
-            ((uart_private_t *)module->private)->_read = &uart_private_read_8bit_soft;
+            ((uart_private_t *)module->private)->read_ = &uart_private_read_8bit_soft;
         }
 
-        ((uart_private_t *)module->private)->_flush_rx = &uart_private_flush_rx_soft;
-        ((uart_private_t *)module->private)->_rx_isr = &uart_private_rx_isr_soft;
+        ((uart_private_t *)module->private)->flush_rx_ = &uart_private_flush_rx_soft;
+        ((uart_private_t *)module->private)->rx_isr_ = &uart_private_rx_isr_soft;
 
         break;
     case UART_RX_BUFFER_MODE_HYBRID:
@@ -1689,19 +1687,19 @@ int uart_init(uart_module_t *module,
         // Check what major mode is in use
         if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_9BIT )
         {// Using 9-bit mode
-            ((uart_private_t *)module->private)->_read = &uart_private_read_9bit_hybrid;
+            ((uart_private_t *)module->private)->read_ = &uart_private_read_9bit_hybrid;
         }
         else if( (UART_GET_ATTR(module).mode_settings & UART_MAJOR_MODE_BITMASK) == UART_MAJOR_MODE_LIN )
         {// Using LIN mode
-            ((uart_private_t *)module->private)->_read = &uart_private_read_lin_hybrid;
+            ((uart_private_t *)module->private)->read_ = &uart_private_read_lin_hybrid;
         }
         else
         {// Default to using standard (8-bit) mode, allocate a byte for each character
-            ((uart_private_t *)module->private)->_read = &uart_private_read_8bit_hybrid;
+            ((uart_private_t *)module->private)->read_ = &uart_private_read_8bit_hybrid;
         }
 
-        ((uart_private_t *)module->private)->_flush_rx = &uart_private_flush_rx_hybrid;
-        ((uart_private_t *)module->private)->_rx_isr = &uart_private_rx_isr_hybrid;
+        ((uart_private_t *)module->private)->flush_rx_ = &uart_private_flush_rx_hybrid;
+        ((uart_private_t *)module->private)->rx_isr_ = &uart_private_rx_isr_hybrid;
 
         break;
     default:
@@ -1754,7 +1752,7 @@ int uart_set_baudrate(uart_module_t *module,
     {
     case UART_BAUDRATE_1200:
         // Set baudrate to 1,200bps
-        ((uart_private_t *)module->private)->_baudrate = baudrate;
+        ((uart_private_t *)module->private)->baudrate_ = baudrate;
         
         // Set BRGH bit
         WRITE_MASK_SET(*(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxMODE), UART_SFR_BITMASK_BRGH);
@@ -1765,7 +1763,7 @@ int uart_set_baudrate(uart_module_t *module,
         break;
     case UART_BAUDRATE_2400:
         // Set baudrate to 2,400bps
-        ((uart_private_t *)module->private)->_baudrate = baudrate;
+        ((uart_private_t *)module->private)->baudrate_ = baudrate;
         
         // Set BRGH bit
         WRITE_MASK_SET(*(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxMODE), UART_SFR_BITMASK_BRGH);
@@ -1776,7 +1774,7 @@ int uart_set_baudrate(uart_module_t *module,
         break;
     case UART_BAUDRATE_4800:
         // Set baudrate to 4,800bps
-        ((uart_private_t *)module->private)->_baudrate = baudrate;
+        ((uart_private_t *)module->private)->baudrate_ = baudrate;
 
         // Set BRGH bit
         WRITE_MASK_SET(*(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxMODE), UART_SFR_BITMASK_BRGH);
@@ -1787,7 +1785,7 @@ int uart_set_baudrate(uart_module_t *module,
         break;
     case UART_BAUDRATE_9600:
         // Set baudrate to 9,600bps
-        ((uart_private_t *)module->private)->_baudrate = UART_BAUDRATE_9600;
+        ((uart_private_t *)module->private)->baudrate_ = UART_BAUDRATE_9600;
 
         // Set BRGH bit
         WRITE_MASK_SET(*(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxMODE), UART_SFR_BITMASK_BRGH);
@@ -1798,7 +1796,7 @@ int uart_set_baudrate(uart_module_t *module,
         break;
     case UART_BAUDRATE_19200:
         // Set baudrate to 19,200bps
-        ((uart_private_t *)module->private)->_baudrate = baudrate;
+        ((uart_private_t *)module->private)->baudrate_ = baudrate;
 
         // Set BRGH bit
         WRITE_MASK_SET(*(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxMODE), UART_SFR_BITMASK_BRGH);
@@ -1809,7 +1807,7 @@ int uart_set_baudrate(uart_module_t *module,
         break;
     case UART_BAUDRATE_38400:
         // Set baudrate to 38,400bps
-        ((uart_private_t *)module->private)->_baudrate = baudrate;
+        ((uart_private_t *)module->private)->baudrate_ = baudrate;
 
         // Set BRGH bit
         WRITE_MASK_SET(*(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxMODE), UART_SFR_BITMASK_BRGH);
@@ -1820,7 +1818,7 @@ int uart_set_baudrate(uart_module_t *module,
         break;
     case UART_BAUDRATE_57600:
         // Set baudrate to 57,600bps
-        ((uart_private_t *)module->private)->_baudrate = baudrate;
+        ((uart_private_t *)module->private)->baudrate_ = baudrate;
 
         // Set BRGH bit
         WRITE_MASK_SET(*(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxMODE), UART_SFR_BITMASK_BRGH);
@@ -1831,7 +1829,7 @@ int uart_set_baudrate(uart_module_t *module,
         break;
     case UART_BAUDRATE_115200:
         // Set baudrate to 115,200bps
-        ((uart_private_t *)module->private)->_baudrate = baudrate;
+        ((uart_private_t *)module->private)->baudrate_ = baudrate;
 
         // Set BRGH bit
         WRITE_MASK_SET(*(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxMODE), UART_SFR_BITMASK_BRGH);
@@ -1842,7 +1840,7 @@ int uart_set_baudrate(uart_module_t *module,
         break;
     case UART_BAUDRATE_230400:
         // Set baudrate to 230,400bps
-        ((uart_private_t *)module->private)->_baudrate = baudrate;
+        ((uart_private_t *)module->private)->baudrate_ = baudrate;
 
         // Set BRGH bit
         WRITE_MASK_SET(*(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxMODE), UART_SFR_BITMASK_BRGH);
@@ -1853,7 +1851,7 @@ int uart_set_baudrate(uart_module_t *module,
         break;
     case UART_BAUDRATE_460800:
         // Set baudrate to 460,800bps
-        ((uart_private_t *)module->private)->_baudrate = baudrate;
+        ((uart_private_t *)module->private)->baudrate_ = baudrate;
 
         // Set BRGH bit
         WRITE_MASK_SET(*(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxMODE), UART_SFR_BITMASK_BRGH);
@@ -1864,7 +1862,7 @@ int uart_set_baudrate(uart_module_t *module,
         break;
     case UART_BAUDRATE_921600:
         // Set baudrate to 921,600bps
-        ((uart_private_t *)module->private)->_baudrate = baudrate;
+        ((uart_private_t *)module->private)->baudrate_ = baudrate;
 
         // Set BRGH bit
         WRITE_MASK_SET(*(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxMODE), UART_SFR_BITMASK_BRGH);
@@ -1875,7 +1873,7 @@ int uart_set_baudrate(uart_module_t *module,
         break;
     case UART_BAUDRATE_1000000:
         // Set baudrate to 1,000,000bps
-        ((uart_private_t *)module->private)->_baudrate = baudrate;
+        ((uart_private_t *)module->private)->baudrate_ = baudrate;
 
         // Set BRGH bit
         WRITE_MASK_SET(*(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxMODE), UART_SFR_BITMASK_BRGH);
@@ -1886,7 +1884,7 @@ int uart_set_baudrate(uart_module_t *module,
         break;
     case UART_BAUDRATE_1843200:
         // Set baudrate to 1,843,200bps
-        ((uart_private_t *)module->private)->_baudrate = baudrate;
+        ((uart_private_t *)module->private)->baudrate_ = baudrate;
 
         // Set BRGH bit
         WRITE_MASK_SET(*(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxMODE), UART_SFR_BITMASK_BRGH);
@@ -1897,7 +1895,7 @@ int uart_set_baudrate(uart_module_t *module,
         break;
     case UART_BAUDRATE_2000000:
         // Set baudrate to 2,000,000bps
-        ((uart_private_t *)module->private)->_baudrate = baudrate;
+        ((uart_private_t *)module->private)->baudrate_ = baudrate;
 
         // Set BRGH bit
         WRITE_MASK_SET(*(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxMODE), UART_SFR_BITMASK_BRGH);
@@ -1908,7 +1906,7 @@ int uart_set_baudrate(uart_module_t *module,
         break;
     case UART_BAUDRATE_3686400:
         // Set baudrate to 3,686,400bps
-        ((uart_private_t *)module->private)->_baudrate = baudrate;
+        ((uart_private_t *)module->private)->baudrate_ = baudrate;
 
         // Set BRGH bit
         WRITE_MASK_SET(*(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxMODE), UART_SFR_BITMASK_BRGH);
@@ -1936,7 +1934,7 @@ int uart_get_baudrate(uart_module_t *module)
     }
 
     // Return current baudrate setting
-    return ((uart_private_t *)module->private)->_baudrate;
+    return ((uart_private_t *)module->private)->baudrate_;
 }
 
 int uart_autobaud(uart_module_t *module)
@@ -1951,7 +1949,7 @@ int uart_autobaud(uart_module_t *module)
     WRITE_MASK_SET(*(UART_GET_BASE_ADDRESS(module) + UART_SFR_OFFSET_UxMODE), UART_SFR_BITMASK_ABAUD);
 
     // Set baudrate to UART_BAUDRATE_AUTO
-    ((uart_private_t *)(module->private))->_baudrate = UART_BAUDRATE_AUTO;
+    ((uart_private_t *)(module->private))->baudrate_ = UART_BAUDRATE_AUTO;
 
     return UART_E_NONE;
 }
@@ -2000,7 +1998,7 @@ int uart_open(uart_module_t *module,
     // Check for valid open states
     // TX only is not allowed, so if UART_DIRECTION_TX is used RX must already be open.
     if( direction == UART_DIRECTION_TX \
-        && (((uart_private_t *)(module->private))->_open_state == UART_DIRECTION_NONE) )
+        && (((uart_private_t *)(module->private))->open_state_ == UART_DIRECTION_NONE) )
     {// Invalid open state
         return UART_E_INPUT;
     }
@@ -2033,8 +2031,8 @@ int uart_open(uart_module_t *module,
             return UART_E_ASSERT;
         }
         
-        // Update _open_state
-        WRITE_MASK_SET(((uart_private_t *)(module->private))->_open_state, UART_DIRECTION_RX);
+        // Update open_state_
+        WRITE_MASK_SET(((uart_private_t *)(module->private))->open_state_, UART_DIRECTION_RX);
     }
 
     
@@ -2066,8 +2064,8 @@ int uart_open(uart_module_t *module,
             return UART_E_ASSERT;
         }
         
-        // Update _open_state
-        WRITE_MASK_SET(((uart_private_t *)(module->private))->_open_state, UART_DIRECTION_TX);
+        // Update open_state_
+        WRITE_MASK_SET(((uart_private_t *)(module->private))->open_state_, UART_DIRECTION_TX);
     }
 
     return UART_E_NONE;
@@ -2084,7 +2082,7 @@ int uart_write(uart_module_t *module,
     }
 
     // Call correct write function and return result
-    return ((uart_private_t *)module->private)->_write(module, buffer, length);
+    return ((uart_private_t *)module->private)->write_(module, buffer, length);
 }
 
 int uart_read(uart_module_t *module,
@@ -2098,7 +2096,7 @@ int uart_read(uart_module_t *module,
     }
 
     // Call correct read function and return result
-    return ((uart_private_t *)module->private)->_read(module, buffer, length);
+    return ((uart_private_t *)module->private)->read_(module, buffer, length);
 }
 
 int uart_close(uart_module_t *module,
@@ -2113,7 +2111,7 @@ int uart_close(uart_module_t *module,
     // Check for valid open states
     // TX only is not allowed, so if UART_DIRECTION_RX is used TX must not be open.
     if( direction == UART_DIRECTION_RX \
-        && (((uart_private_t *)(module->private))->_open_state == UART_DIRECTION_TXRX) )
+        && (((uart_private_t *)(module->private))->open_state_ == UART_DIRECTION_TXRX) )
     {// Invalid open state
         return UART_E_INPUT;
     }
@@ -2146,8 +2144,8 @@ int uart_close(uart_module_t *module,
             return UART_E_ASSERT;
         }
         
-        // Update _open_state
-        WRITE_MASK_CLEAR(((uart_private_t *)(module->private))->_open_state, UART_DIRECTION_RX);
+        // Update open_state_
+        WRITE_MASK_CLEAR(((uart_private_t *)(module->private))->open_state_, UART_DIRECTION_RX);
     }
 
     
@@ -2179,8 +2177,8 @@ int uart_close(uart_module_t *module,
             return UART_E_ASSERT;
         }
         
-        // Update _open_state
-        WRITE_MASK_CLEAR(((uart_private_t *)(module->private))->_open_state, UART_DIRECTION_TX);
+        // Update open_state_
+        WRITE_MASK_CLEAR(((uart_private_t *)(module->private))->open_state_, UART_DIRECTION_TX);
     }
 
     return UART_E_NONE;
@@ -2198,9 +2196,9 @@ void uart_cleanup(uart_module_t *module)
      */
 
     // Free all allocated memory
-    free( ((uart_private_t *)(module->private))->_tx_buffer );
-    free( ((uart_private_t *)(module->private))->_rx_buffer );
-    free( ((uart_private_t *)(module->private))->_local_addr );
+    free( ((uart_private_t *)(module->private))->tx_buffer_ );
+    free( ((uart_private_t *)(module->private))->rx_buffer_ );
+    free( ((uart_private_t *)(module->private))->local_addr_ );
     free( module->private );
     module->private = NULL;
     
@@ -2220,13 +2218,13 @@ inline bool uart_is_open(uart_module_t *module,
         // Check if both TX and RX are closed
         // Return false if RX is enabled
         // Return true if RX is disabled (TX cannot be enabled without RX also enabled)
-        return IS_MASK_CLEAR(((uart_private_t *)(module->private))->_open_state, UART_DIRECTION_BITMASK);
+        return IS_MASK_CLEAR(((uart_private_t *)(module->private))->open_state_, UART_DIRECTION_BITMASK);
 
     case UART_DIRECTION_RX:
         // Check if RX is enabled (don't care about TX)
         // Return false if RX is disabled
         // Return true if RX is enabled
-        return IS_MASK_SET(((uart_private_t *)(module->private))->_open_state, UART_DIRECTION_RX);
+        return IS_MASK_SET(((uart_private_t *)(module->private))->open_state_, UART_DIRECTION_RX);
         
     case UART_DIRECTION_TX:
         // Check if TX is enabled (TX cannot be enabled without RX also enabled)
@@ -2234,7 +2232,7 @@ inline bool uart_is_open(uart_module_t *module,
         // Check if both TX and RX are enabled
         // Return false if RX is disabled
         // Return true if RX and TX are enabled
-        return IS_MASK_SET(((uart_private_t *)(module->private))->_open_state, UART_DIRECTION_TXRX);
+        return IS_MASK_SET(((uart_private_t *)(module->private))->open_state_, UART_DIRECTION_TXRX);
 
     default:
         return false;

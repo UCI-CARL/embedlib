@@ -13,7 +13,7 @@
  */
 
 /**
- * @ingroup uart_module
+ * @ingroup uart
  *
  * @{
  */

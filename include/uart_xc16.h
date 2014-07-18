@@ -302,8 +302,8 @@ enum uart_error_e
     UART_E_SOFTBUF  = -6,     /**< A problem occurred with the software buffer */
     UART_E_ALLOC    = -7,     /**< A problem occurred during dynamic memory allocation */
     UART_E_CLOSED   = -8,     /**< The module is closed and cannot be read from/written to */
-    UART_E_ASSERT   = 0xEFFE, /**< An assertion failed */
-    UART_E_UNKNOWN  = 0xEFFF  /**< Unknown error occurred */
+    UART_E_ASSERT   = 0x8001, /**< An assertion failed */
+    UART_E_UNKNOWN  = 0x8000  /**< Unknown error occurred */
 };
 
 /**
@@ -392,7 +392,7 @@ typedef struct uart_attr_s
 } uart_attr_t;
 
 
-/* ***** Module Declaration ***** */
+/* ***** Module Definition ***** */
 
 // Forward declaration of uart_module_t for use in uart_module_s definition
 struct uart_module_s;
