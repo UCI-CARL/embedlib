@@ -349,24 +349,24 @@ enum canbus_buffer_e
     CANBUS_BUFFER_B12  = 0x000C, /**< Select buffer 12. */
     CANBUS_BUFFER_B13  = 0x000D, /**< Select buffer 13. */
     CANBUS_BUFFER_B14  = 0x000E, /**< Select buffer 14. */
-    CANBUS_BUFFER_B15  = 0x000F, /**< Select buffer 15. */
-    CANBUS_BUFFER_B16  = 0x0010, /**< Select buffer 16. */
-    CANBUS_BUFFER_B17  = 0x0011, /**< Select buffer 17. */
-    CANBUS_BUFFER_B18  = 0x0012, /**< Select buffer 18. */
-    CANBUS_BUFFER_B19  = 0x0013, /**< Select buffer 19. */
-    CANBUS_BUFFER_B20  = 0x0014, /**< Select buffer 20. */
-    CANBUS_BUFFER_B21  = 0x0015, /**< Select buffer 21. */
-    CANBUS_BUFFER_B22  = 0x0016, /**< Select buffer 22. */
-    CANBUS_BUFFER_B23  = 0x0017, /**< Select buffer 23. */
-    CANBUS_BUFFER_B24  = 0x0018, /**< Select buffer 24. */
-    CANBUS_BUFFER_B25  = 0x0019, /**< Select buffer 25. */
-    CANBUS_BUFFER_B26  = 0x001A, /**< Select buffer 26. */
-    CANBUS_BUFFER_B27  = 0x001B, /**< Select buffer 27. */
-    CANBUS_BUFFER_B28  = 0x001C, /**< Select buffer 28. */
-    CANBUS_BUFFER_B29  = 0x001D, /**< Select buffer 29. */
-    CANBUS_BUFFER_B30  = 0x001E, /**< Select buffer 30. */
-    CANBUS_BUFFER_B31  = 0x001F, /**< Select buffer 31. */
-    CANBUS_BUFFER_FIFO = 0x0020, /**< Select FIFO buffer. */
+    CANBUS_BUFFER_FIFO = 0x000F, /**< Select FIFO buffer. */
+    CANBUS_BUFFER_B15  = 0x0010, /**< Select buffer 15. */
+    CANBUS_BUFFER_B16  = 0x0011, /**< Select buffer 16. */
+    CANBUS_BUFFER_B17  = 0x0012, /**< Select buffer 17. */
+    CANBUS_BUFFER_B18  = 0x0013, /**< Select buffer 18. */
+    CANBUS_BUFFER_B19  = 0x0014, /**< Select buffer 19. */
+    CANBUS_BUFFER_B20  = 0x0015, /**< Select buffer 20. */
+    CANBUS_BUFFER_B21  = 0x0016, /**< Select buffer 21. */
+    CANBUS_BUFFER_B22  = 0x0017, /**< Select buffer 22. */
+    CANBUS_BUFFER_B23  = 0x0018, /**< Select buffer 23. */
+    CANBUS_BUFFER_B24  = 0x0019, /**< Select buffer 24. */
+    CANBUS_BUFFER_B25  = 0x001A, /**< Select buffer 25. */
+    CANBUS_BUFFER_B26  = 0x001B, /**< Select buffer 26. */
+    CANBUS_BUFFER_B27  = 0x001C, /**< Select buffer 27. */
+    CANBUS_BUFFER_B28  = 0x001D, /**< Select buffer 28. */
+    CANBUS_BUFFER_B29  = 0x001E, /**< Select buffer 29. */
+    CANBUS_BUFFER_B30  = 0x001F, /**< Select buffer 30. */
+    CANBUS_BUFFER_B31  = 0x0020, /**< Select buffer 31. */
     CANBUS_BUFFER_NONE = 0x0021, /**< Select no buffers. Null option. */
     CANBUS_BUFFER_ALL  = 0x0022  /**< Select all buffers. */
 };
@@ -381,6 +381,7 @@ typedef enum canbus_buffer_e canbus_buffer_t;
  */
 enum canbus_priority_e
 {
+    // These values are directly related to hardware value, DO NOT CHANGE!!
     CANBUS_PRIORITY_LOWEST  = 0x0000, /**< Lowest priority message. */
     CANBUS_PRIORITY_LOW     = 0x0001, /**< Low priority message. */
     CANBUS_PRIORITY_HIGH    = 0x0002, /**< High priority message. */
@@ -397,10 +398,9 @@ typedef enum canbus_priority_e canbus_priority_t;
  */
 enum canbus_direction_e
 {
-    CANBUS_DIRECTION_NONE = 0x0000, /**< Neither transmit or receive. */
+    // These values are directly related to hardware values, DO NOT CHANGE!!
+    CANBUS_DIRECTION_RX   = 0x0000, /**< Receive. */
     CANBUS_DIRECTION_TX   = 0x0001, /**< Transmit. */
-    CANBUS_DIRECTION_RX   = 0x0002, /**< Receive. */
-    CANBUS_DIRECTION_TXRX = 0x0003  /**< Both transmit and receive. */
 };
 typedef enum canbus_direction_e canbus_direction_t;
 
@@ -470,7 +470,8 @@ typedef enum canbus_error_e
  */
 struct canbus_header_s
 {
-    int auto_tx :1; /**< Automatically transmit the message when an RTR message is received. */
+    // Disabled since, currently, a filter may not point at a TX buffer.
+    //int auto_tx :1; /**< Automatically transmit the message when an RTR message is received. */
     
     int sid :11; /**< The standard ID of a message (11-bits). */
     int rtr :1;  /**< The remote transmit request (RTR) bit. */
@@ -529,20 +530,57 @@ typedef struct canbus_message_s canbus_message_t;
  */
 struct canbus_attr_s
 {
-    int bit_timing_pre             :6;
-    int bit_timing_sync_jump       :2;
-    int bit_timing_prop_seg        :3;
-    int bit_timing_phase_seg1      :3;
-    int bit_timing_phase_seg2      :3;
-    int bit_timing_phase_seg2_prog :1;
-    int bit_timing_sample          :1;
+    union
+    {
+        int bit_timing :19;
+        struct
+        {
+            int bit_timing_pre             :6;
+            int bit_timing_sync_jump       :2;
+            int bit_timing_prop_seg        :3;
+            int bit_timing_phase_seg1      :3;
+            int bit_timing_phase_seg2      :3;
+            int bit_timing_phase_seg2_prog :1;
+            int bit_timing_sample          :1;
+        };
+    };
 
-    int module_wakeup    :1;
-    int module_cpuidle   :1;
-    int module_timestamp :1;
+    union
+    {
+        int module :3;
+        struct
+        {
+            int module_wakeup    :1;
+            int module_cpuidle   :1;
+            int module_timestamp :1;
+        };
+    };
 
-    int fifo_start :5;
-    int fifo_length :3;
+    union
+    {
+        int fifo :8;
+        struct
+        {
+            int fifo_start :5;
+            int fifo_length :3;
+        };
+    };
+
+    union
+    {
+        int buffer_dir :8;
+        struct
+        {
+            int b0_dir :1;
+            int b1_dir :1;
+            int b2_dir :1;
+            int b3_dir :1;
+            int b4_dir :1;
+            int b5_dir :1;
+            int b6_dir :1;
+            int b7_dir :1;
+        };
+    };
 };
 typedef struct canbus_attr_s canbus_attr_t;
 
@@ -697,7 +735,8 @@ struct canbus_global_s
                              canbus_header_t *filter_value);
 
     /**
-     * @brief Set which buffer a message should go to when it hits a particular filter.
+     * @brief Connect a filter and a buffer, so when a message hits the filter it will be stored in
+     * the given buffer.
      *
      * @details Nothing here.
      *
@@ -708,51 +747,19 @@ struct canbus_global_s
      *
      * @public
      */
-    int (* const set_buffer_pointer)(canbus_t *canbus,
-                                     canbus_filter_t filter_num,
-                                     canbus_buffer_t buffer_num);
+    int (* const connect)(canbus_t *canbus,
+                          canbus_filter_t filter_num,
+                          canbus_buffer_t buffer_num);
 
     /**
-     * @brief Enable a filter.
+     * @brief Disconnect a filter and a buffer.
      *
-     * @details The given filter will now be checked against incoming messages, looking for a
-     * match. If there is a match the message will be sent to the buffer specified using
-     * @ref set_buffer_pointer().
-     *
-     * If a filter is enabled and it's buffer pointer points to a buffer that is not open for
-     * receiving, then no messages will be received by that filter. As soon as the buffer is
-     * opened as RX messages may be recieved by the filter into that buffer.
+     * @details Nothing here.
      *
      * @public
      */
-    int (* const enable_filter)(canbus_t *canbus,
-                                canbus_filter_t filter_num);
-
-    /**
-     * @brief Disable a filter.
-     *
-     * @details The given filter will stop checking incoming messages.
-     *
-     * @public
-     */
-    int (* const disable_filter)(canbus_t *canbus,
-                                 canbus_filter_t filter_num);
-
-    /**
-     * @brief Open a buffer for either reading or writing.
-     *
-     * @details Open a single buffer for either reading or writing. Only B0-B7 may be opened for
-     * writing and only B0-B14 and the FIFO buffer may be opened for reading. Any other inputs will
-     * be ignored.
-     *
-     * Opening a buffer as RX is not enough for it to receive messages. It must also have a filter
-     * buffer pointer pointing at it with that filter enabled.
-     *
-     * @public
-     */
-    int (* const open)(canbus_t *canbus,
-                       canbus_buffer_t buffer_num,
-                       canbus_direction_t direction);
+    int (* const disconnect)(canbus_t *canbus,
+                             canbus_filter_t filter_num);
 
     /**
      * @brief Write a message to the CAN bus using the given buffer and priority level.
@@ -856,25 +863,6 @@ struct canbus_global_s
                             canbus_buffer_t buffer_num);
 
     /**
-     * @brief Check if the specified buffer is open in the specified direction.
-     *
-     * @details Check if the specified buffer is opened in the specified direction. If
-     * CANBUS_DIRECTION_TXRX is given the function will return <cc>true</cc> if either direction
-     * is open.
-     *
-     * @param[in]  canbus     The canbus_t object to check.
-     * @param[in]  buffer_num The buffer of which to check the open state.
-     * @param[in]  direction  The direction to check when checking for an open state.
-     * @return A boolean value, <cc>true</cc> if the buffer is open in the specified direction or
-     * <cc>false</cc> otherwise.
-     *
-     * @public
-     */
-    bool (* const is_open)(canbus_t *canbus,
-                           canbus_buffer_t buffer_num,
-                           canbus_direction_t direction);
-
-    /**
      * @brief Check if a CAN bus object is valid.
      *
      * @details Nothing here.
@@ -884,23 +872,14 @@ struct canbus_global_s
     bool (* const is_valid)(canbus_t *canbus);
 
     /**
-     * @brief Close the specified buffer.
+     * @brief Get the buffer's direction.
      *
-     * @details Close the specified buffer in both RX and TX directions. If CANBUS_BUFFER_ALL is
-     * given then all buffers will attempt to close.
-     *
-     * If a buffer is opened as TX and has a message waiting for transmission then attempting to
-     * close it will fail. The message must be aborted first then the buffer may be closed. If
-     * there is a message waiting to be read then the message will be lost and the buffer closed.
-     *
-     * @param[in]  canbus     The canbus_t object to work on.
-     * @param[in]  buffer_num The buffer to close.
-     * @return A @ref canbus_error_t value.
+     * @details Nothing here.
      *
      * @public
      */
-    int (* const close)(canbus_t *canbus,
-                        canbus_buffer_t buffer_num);
+    int (* const get_direction)(canbus_t *canbus,
+                                canbus_buffer_t buffer_num);
 
     /**
      * @brief Free any dynamically allocated memory and shutdown the hardware module.
