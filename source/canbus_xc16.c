@@ -3189,7 +3189,7 @@ static int canbus_read(canbus_t *object,
             *(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXFUL1) &= ~(1<<buffer_num);
         }
         else
-        {// Use CiRXFUL1
+        {// Use CiRXFUL2
             // Clear correct RXFUL bit
             *(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXFUL2) &= ~(1<<(buffer_num-16));
         }
@@ -3327,6 +3327,126 @@ static int canbus_peek(canbus_t *object,
 static bool canbus_is_empty(canbus_t *object,
                             canbus_buffer_t buffer_num)
 {
+    // Check for valid object
+    if( !canbus.is_valid(object) )
+    {// Invalid object
+        return false;
+    }
+
+    // May only check state of buffers 0-31 and FIFO, not ALL or NONE
+    if( buffer_num == CANBUS_BUFFER_ALL || buffer_num == CANBUS_BUFFER_NONE )
+    {
+        return false;
+    }
+
+    // Check if buffer exists
+    if( !canbus.buffer_exists(object, buffer_num) )
+    {// Buffer doesn't exist in DMA RAM
+        return false;
+    }
+
+    // Check if buffer is part of FIFO region
+    if( buffer_num >= ((canbus_private_t *)(object->private))->attr_.fifo_start \
+        && buffer_num != CANBUS_BUFFER_FIFO )
+    {// Filter buffer pointer points to a buffer in or past the FIFO region
+        // Return an error
+        return false;
+    }
+    
+    // Check the direction of buffer_num
+    if( canbus.get_direction(object, buffer_num) == CANBUS_DIRECTION_RX )
+    {// Buffer is marked RX
+        // Check the special case of the FIFO buffer
+        if( buffer_num == CANBUS_BUFFER_FIFO )
+        {// Check the FIFO buffer for unread messages
+            // Check which CiRXFUL SFR to use
+            if( (((canbus_cififo_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                           + CANBUS_SFR_OFFSET_CiFIFO))->fnrb) <= 0x000F )
+            {// Use CiRXFUL1
+                // Check the correct RXFUL bit
+                // Return true if RXFUL bit is false (no message waiting to be read)
+                return !( *(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXFUL1) \
+                         & (1<<((canbus_cififo_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                                         + CANBUS_SFR_OFFSET_CiFIFO))->fnrb) );
+            }
+            else
+            {// Use CiRXFUL2
+                // Check the correct RXFUL bit
+                // Return true if RXFUL bit is false (no message waiting to be read)
+                return !(*(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXFUL2) \
+                         & (1<<(((canbus_cififo_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                                          + CANBUS_SFR_OFFSET_CiFIFO))->fnrb)-16));
+            }
+        }
+        else
+        {// Check if the given buffer is unread
+            // Check which CiRXFUL SFR to use
+            if( buffer_num <= CANBUS_BUFFER_B15 )
+            {// Use CiRXFUL1
+                // Check the correct RXFUL bit
+                // Return true if RXFUL bit is false (no message waiting to be read)
+                return !( *(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXFUL1) \
+                         & (1<<buffer_num) );
+            }
+            else
+            {// Use CiRXFUL2
+                // Clear correct RXFUL bit
+                // Return true if RXFUL bit is false (no message waiting to be read)
+                return !( *(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXFUL2) \
+                          & (1<<(buffer_num-16)) );
+            }
+        }
+    }
+    else
+    {// Buffer is marked TX
+        // Check the specified buffer for a message awaiting transmission
+        switch( buffer_num )
+        {
+        case CANBUS_BUFFER_B0:
+            // Check if there is a message currently in B0
+            // Return true if TXREQm is false (no message waiting to be sent)
+            return !( ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                                   + CANBUS_SFR_OFFSET_CiTR01CON))->txreqm );
+        case CANBUS_BUFFER_B1:
+            // Check if there is a message currently in B1
+            // Return true if TXREQn is false (no message waiting to be sent)
+            return !( ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                                   + CANBUS_SFR_OFFSET_CiTR01CON))->txreqn );
+        case CANBUS_BUFFER_B2:
+            // Check if there is a message currently in B2
+            // Return true if TXREQm is false (no message waiting to be sent)
+            return !( ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                                   + CANBUS_SFR_OFFSET_CiTR23CON))->txreqm );
+        case CANBUS_BUFFER_B3:
+            // Check if there is a message currently in B3
+            // Return true if TXREQn is false (no message waiting to be sent)
+            return !( ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                                   + CANBUS_SFR_OFFSET_CiTR23CON))->txreqn );
+        case CANBUS_BUFFER_B4:
+            // Check if there is a message currently in B4
+            // Return true if TXREQm is false (no message waiting to be sent)
+            return !( ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                                   + CANBUS_SFR_OFFSET_CiTR45CON))->txreqm );
+        case CANBUS_BUFFER_B5:
+            // Check if there is a message currently in B5
+            // Return true if TXREQn is false (no message waiting to be sent)
+            return !( ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                                   + CANBUS_SFR_OFFSET_CiTR45CON))->txreqn );
+        case CANBUS_BUFFER_B6:
+            // Check if there is a message currently in B6
+            // Return true if TXREQm is false (no message waiting to be sent)
+            return !( ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                                   + CANBUS_SFR_OFFSET_CiTR67CON))->txreqm );
+        case CANBUS_BUFFER_B7:
+            // Check if there is a message currently in B7
+            // Return true if TXREQn is false (no message waiting to be sent)
+            return !( ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                                   + CANBUS_SFR_OFFSET_CiTR67CON))->txreqn );
+        default:
+            // This should never happen, only buffers 0-7 are able to be TX!
+            return false;
+        }
+    }
 }
 
 /**
@@ -3459,8 +3579,8 @@ static bool canbus_buffer_exists(canbus_t *object,
  */
 static bool canbus_is_valid(canbus_t *object)
 {
-    return ( object != NULL \
-             && object->module_number > 0 \
+    return ( object != NULL                                          \
+             && object->module_number > 0                            \
              && object->module_number <= CANBUS_HW_NUMBER_OF_MODULES \
              && object->private != NULL );
 }
