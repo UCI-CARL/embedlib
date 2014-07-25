@@ -212,6 +212,7 @@ enum canbus_attr_e
     // FIFO start buffer
     // 5-bits
     // Note: Buffer 8 is the default start, so it has a value of 0x0000.
+    // Note: FIFO may not be disabled
     CANBUS_FIFO_START_B8   = 0x0000, /**< Select buffer 8 as FIFO start. @default */
     CANBUS_FIFO_START_B0   = 0x0001, /**< Select buffer 0 as FIFO start. */
     CANBUS_FIFO_START_B1   = 0x0002, /**< Select buffer 1 as FIFO start. */
@@ -248,6 +249,7 @@ enum canbus_attr_e
     // FIFO length
     // 3-bits
     // Note: Length 24 is the default, so it has a value of 0x0000.
+    // Note: FIFO may not be disabled.
     CANBUS_FIFO_LENGTH_24 = 0x0000, /**< FIFO is 24 buffers long. @default */
     CANBUS_FIFO_LENGTH_4  = 0x0001, /**< FIFO is 4 buffers long. */
     CANBUS_FIFO_LENGTH_6  = 0x0002, /**< FIFO is 6 buffers long. */
@@ -334,6 +336,7 @@ typedef enum canbus_filter_e canbus_filter_t;
 enum canbus_buffer_e
 {
     // These values are directly related to hardware values, DO NOT CHANGE!!
+    // The values are expected to be the same as the buffer numbers.
     CANBUS_BUFFER_B0   = 0x0000, /**< Select buffer 0. */
     CANBUS_BUFFER_B1   = 0x0001, /**< Select buffer 1. */
     CANBUS_BUFFER_B2   = 0x0002, /**< Select buffer 2. */
@@ -349,24 +352,25 @@ enum canbus_buffer_e
     CANBUS_BUFFER_B12  = 0x000C, /**< Select buffer 12. */
     CANBUS_BUFFER_B13  = 0x000D, /**< Select buffer 13. */
     CANBUS_BUFFER_B14  = 0x000E, /**< Select buffer 14. */
-    CANBUS_BUFFER_FIFO = 0x000F, /**< Select FIFO buffer. */
-    CANBUS_BUFFER_B15  = 0x0010, /**< Select buffer 15. */
-    CANBUS_BUFFER_B16  = 0x0011, /**< Select buffer 16. */
-    CANBUS_BUFFER_B17  = 0x0012, /**< Select buffer 17. */
-    CANBUS_BUFFER_B18  = 0x0013, /**< Select buffer 18. */
-    CANBUS_BUFFER_B19  = 0x0014, /**< Select buffer 19. */
-    CANBUS_BUFFER_B20  = 0x0015, /**< Select buffer 20. */
-    CANBUS_BUFFER_B21  = 0x0016, /**< Select buffer 21. */
-    CANBUS_BUFFER_B22  = 0x0017, /**< Select buffer 22. */
-    CANBUS_BUFFER_B23  = 0x0018, /**< Select buffer 23. */
-    CANBUS_BUFFER_B24  = 0x0019, /**< Select buffer 24. */
-    CANBUS_BUFFER_B25  = 0x001A, /**< Select buffer 25. */
-    CANBUS_BUFFER_B26  = 0x001B, /**< Select buffer 26. */
-    CANBUS_BUFFER_B27  = 0x001C, /**< Select buffer 27. */
-    CANBUS_BUFFER_B28  = 0x001D, /**< Select buffer 28. */
-    CANBUS_BUFFER_B29  = 0x001E, /**< Select buffer 29. */
-    CANBUS_BUFFER_B30  = 0x001F, /**< Select buffer 30. */
-    CANBUS_BUFFER_B31  = 0x0020, /**< Select buffer 31. */
+    CANBUS_BUFFER_B15  = 0x000F, /**< Select buffer 15. */
+    CANBUS_BUFFER_B16  = 0x0010, /**< Select buffer 16. */
+    CANBUS_BUFFER_B17  = 0x0011, /**< Select buffer 17. */
+    CANBUS_BUFFER_B18  = 0x0012, /**< Select buffer 18. */
+    CANBUS_BUFFER_B19  = 0x0013, /**< Select buffer 19. */
+    CANBUS_BUFFER_B20  = 0x0014, /**< Select buffer 20. */
+    CANBUS_BUFFER_B21  = 0x0015, /**< Select buffer 21. */
+    CANBUS_BUFFER_B22  = 0x0016, /**< Select buffer 22. */
+    CANBUS_BUFFER_B23  = 0x0017, /**< Select buffer 23. */
+    CANBUS_BUFFER_B24  = 0x0018, /**< Select buffer 24. */
+    CANBUS_BUFFER_B25  = 0x0019, /**< Select buffer 25. */
+    CANBUS_BUFFER_B26  = 0x001A, /**< Select buffer 26. */
+    CANBUS_BUFFER_B27  = 0x001B, /**< Select buffer 27. */
+    CANBUS_BUFFER_B28  = 0x001C, /**< Select buffer 28. */
+    CANBUS_BUFFER_B29  = 0x001D, /**< Select buffer 29. */
+    CANBUS_BUFFER_B30  = 0x001E, /**< Select buffer 30. */
+    CANBUS_BUFFER_B31  = 0x001F, /**< Select buffer 31. */
+    
+    CANBUS_BUFFER_FIFO = 0x0020, /**< Select FIFO buffer. */
     CANBUS_BUFFER_NONE = 0x0021, /**< Select no buffers. Null option. */
     CANBUS_BUFFER_ALL  = 0x0022  /**< Select all buffers. */
 };
@@ -435,7 +439,8 @@ typedef enum canbus_error_e
     CANBUS_E_AGAIN  = -1, /**< Resource currently in use, try again later. */
     CANBUS_E_OBJECT = -2, /**< Canbus object was invalid or not usable. */
     CANBUS_E_ALLOC  = -3, /**< Allocation of dynamic memory failed. */
-    CANBUS_E_CLOSED = -4, /**< The buffer is closed. */
+    CANBUS_E_WRITE  = -4, /**< Writing to the buffer failed. */
+    CANBUS_E_READ   = -5, /**< Reading from the buffer failed. */
     
     CANBUS_E_ASSERT  = 0x8001, /**< Assertion failed! This is generally an unrecoverable error. */
     CANBUS_E_UNKNOWN = 0x8000  /**< Unknown error! This is generally an unrecoverable error. */
@@ -498,10 +503,10 @@ typedef struct canbus_header_s canbus_header_t;
 struct canbus_message_s
 {
     canbus_header_t header; /**< The header of the message, containing message ID and flags. */
-    unsigned int dlc;       /**< Data length code (DLC), the number of data bytes in the message. */
-    unsigned char data[8];  /**< Data stored in this message (up to 8 bytes). */
-    unsigned int filter;    /**< The filter that enabled this message to be received. Only relevant
+    unsigned char filter;   /**< The filter that enabled this message to be received. Only relevant
                                for received messages, ignored for transmitted messages. */
+    unsigned char dlc;      /**< Data length code (DLC), the number of data bytes in the message. */
+    unsigned char data[8];  /**< Data stored in this message (up to 8 bytes). */
 };
 typedef struct canbus_message_s canbus_message_t;
 
@@ -668,7 +673,7 @@ struct canbus_global_s
      *
      * @public
      */
-    int (* const init)(canbus_t *canbus,
+    int (* const init)(canbus_t *object,
                        canbus_attr_t *attr,
                        unsigned int tx_dma_channel,
                        unsigned int rx_dma_channel,
@@ -682,7 +687,7 @@ struct canbus_global_s
      *
      * @public
      */
-    int (* const set_mode)(canbus_t *canbus,
+    int (* const set_mode)(canbus_t *object,
                            canbus_mode_t mode);
     /**
      * @brief Set when the notify function should be called.
@@ -698,7 +703,7 @@ struct canbus_global_s
      *
      * @public
      */
-    int (* const notify_on)(canbus_t *canbus,
+    int (* const notify_on)(canbus_t *object,
                             int notification);
     
     /**
@@ -708,7 +713,7 @@ struct canbus_global_s
      *
      * @public
      */
-    int (* const set_mask)(canbus_t *canbus,
+    int (* const set_mask)(canbus_t *object,
                            canbus_mask_t mask_num,
                            canbus_header_t *mask_value);
     
@@ -719,7 +724,7 @@ struct canbus_global_s
      *
      * @public
      */
-    int (* const assign_mask)(canbus_t *canbus,
+    int (* const assign_mask)(canbus_t *object,
                               canbus_mask_t mask_num,
                               canbus_filter_t filter_num);
 
@@ -730,7 +735,7 @@ struct canbus_global_s
      *
      * @public
      */
-    int (* const set_filter)(canbus_t *canbus,
+    int (* const set_filter)(canbus_t *object,
                              canbus_filter_t filter_num,
                              canbus_header_t *filter_value);
 
@@ -747,7 +752,7 @@ struct canbus_global_s
      *
      * @public
      */
-    int (* const connect)(canbus_t *canbus,
+    int (* const connect)(canbus_t *object,
                           canbus_filter_t filter_num,
                           canbus_buffer_t buffer_num);
 
@@ -758,7 +763,7 @@ struct canbus_global_s
      *
      * @public
      */
-    int (* const disconnect)(canbus_t *canbus,
+    int (* const disconnect)(canbus_t *object,
                              canbus_filter_t filter_num);
 
     /**
@@ -783,7 +788,7 @@ struct canbus_global_s
      *
      * @public
      */
-    int (* const write)(canbus_t *canbus,
+    int (* const write)(canbus_t *object,
                         canbus_buffer_t buffer_num,
                         const canbus_message_t *message,
                         canbus_priority_t priority);
@@ -801,7 +806,7 @@ struct canbus_global_s
      *
      * @public
      */
-    int (* const abort_write)(canbus_t *canbus,
+    int (* const abort_write)(canbus_t *object,
                               canbus_buffer_t buffer_num);
     
     /**
@@ -825,7 +830,7 @@ struct canbus_global_s
      *
      * @public
      */
-    int (* const read)(canbus_t *canbus,
+    int (* const read)(canbus_t *object,
                        canbus_buffer_t buffer_num,
                        canbus_message_t *message);
 
@@ -844,7 +849,7 @@ struct canbus_global_s
      *
      * @public
      */
-    int (* const peek)(canbus_t *canbus,
+    int (* const peek)(canbus_t *object,
                        canbus_buffer_t buffer_num,
                        canbus_message_t *message);
 
@@ -859,9 +864,19 @@ struct canbus_global_s
      *
      * @public
      */
-    bool (* const is_empty)(canbus_t *canbus,
+    bool (* const is_empty)(canbus_t *object,
                             canbus_buffer_t buffer_num);
 
+    /**
+     * @brief Check if a buffer exists in DMA RAM.
+     *
+     * @details Nothing here.
+     *
+     * @public
+     */
+    bool (* const buffer_exists)(canbus_t *object,
+                                 canbus_buffer_t buffer_num);
+    
     /**
      * @brief Check if a CAN bus object is valid.
      *
@@ -869,7 +884,7 @@ struct canbus_global_s
      *
      * @public
      */
-    bool (* const is_valid)(canbus_t *canbus);
+    bool (* const is_valid)(canbus_t *object);
 
     /**
      * @brief Get the buffer's direction.
@@ -878,7 +893,7 @@ struct canbus_global_s
      *
      * @public
      */
-    int (* const get_direction)(canbus_t *canbus,
+    int (* const get_direction)(canbus_t *object,
                                 canbus_buffer_t buffer_num);
 
     /**
@@ -888,7 +903,7 @@ struct canbus_global_s
      *
      * @public
      */
-    void (* const clean_up)(canbus_t *canbus);
+    void (* const clean_up)(canbus_t *object);
 
     /* ***** Interrupt Service Routine (ISR) ***** */
 
@@ -907,7 +922,7 @@ struct canbus_global_s
      *
      * @public
      */
-    void (* const isr)(canbus_t *canbus);
+    void (* const isr)(canbus_t *object);
     
 };
 

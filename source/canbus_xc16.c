@@ -814,6 +814,44 @@ union canbus_cirxfneid_bits_u
 };
 typedef struct canbus_cirxfneid_bits_s canbus_cirxfneid_bits_t;
 
+// A buffer is enabled if there is space in the DMA buffer for it.
+struct canbus_buffer_exists_s
+{
+    int b0_exists :1;
+    int b1_exists :1;
+    int b2_exists :1;
+    int b3_exists :1;
+    int b4_exists :1;
+    int b5_exists :1;
+    int b6_exists :1;
+    int b7_exists :1;
+    int b8_exists :1;
+    int b9_exists :1;
+    int b10_exists :1;
+    int b11_exists :1;
+    int b12_exists :1;
+    int b13_exists :1;
+    int b14_exists :1;
+    int b15_exists :1;
+    int b16_exists :1;
+    int b17_exists :1;
+    int b18_exists :1;
+    int b19_exists :1;
+    int b20_exists :1;
+    int b21_exists :1;
+    int b22_exists :1;
+    int b23_exists :1;
+    int b24_exists :1;
+    int b25_exists :1;
+    int b26_exists :1;
+    int b27_exists :1;
+    int b28_exists :1;
+    int b29_exists :1;
+    int b30_exists :1;
+    int b31_exists :1;
+};
+typedef struct canbus_buffer_exists_s canbus_buffer_exists_t;
+    
 
 /* ***** Canbus Private Object ***** */
 
@@ -823,8 +861,7 @@ struct canbus_private_s
     volatile unsigned int *base_address_;
     dma_channel_t *tx_dma_;
     dma_channel_t *rx_dma_;
-    filter_states_t filter_states_;
-    buffer_states_t buffer_states_;
+    canbus_buffer_exists_t buffer_exists_;
 };
 typedef struct canbus_private canbus_private_t;
 
@@ -867,6 +904,8 @@ static int canbus_peek(canbus_t *object,
                        canbus_message_t *message);
 static bool canbus_is_empty(canbus_t *object,
                             canbus_buffer_t buffer_num);
+static bool canbus_buffer_exists(canbus_t *object,
+                                 canbus_buffer_t buffer_num);
 static bool canbus_is_valid(canbus_t *object);
 static int canbus_get_direction(canbus_t *object,
                                 canbus_buffer_t buffer_num);
@@ -894,6 +933,7 @@ canbus_global_t canbus = {
     .read = canbus_read,
     .peek = canbus_peek,
     .is_empty = canbus_is_empty,
+    .buffer_exists = canbus_buffer_exists,
     .is_valid = canbus_is_valid,
     .get_direction = canbus_get_direction,
     .clean_up = canbus_clean_up,
@@ -916,6 +956,7 @@ static int canbus_init(canbus_t *object,
                        volatile unsigned int *dma_buffer,
                        unsigned int dma_buffer_length)
 {
+    unsigned int i;
     dma_attr_t tx_dma_attr;
     dma_attr_t rx_dma_attr;
     unsigned int first_fifo_buffer;
@@ -1189,6 +1230,7 @@ between 1 and 2."
     
     // Set start of FIFO buffer
     // Start calculation of last FIFO buffer by getting start buffer of FIFO
+    /** @todo Remove CANBUS_FIFO_START_Bx enum and use CANBUS_BUFFER_Bx enum instead */
     switch( ((canbus_private_t *)(object->private))->attr_.fifo_start )
     {
     case CANBUS_FIFO_START_B0:
@@ -1500,7 +1542,12 @@ between 1 and 2."
         ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR67CON)) \
             ->txenn = ((canbus_private_t *)(object->private))->attr_.b7_dir;
     }
-    
+
+    // Buffers for which there is space in DMA "exist"
+    for(i=0; i<((((canbus_private_t *)(object->private))->rx_dma_.buffer_a_size)/8); ++i)
+    {// Mark buffers, starting at B0, which have space in the DMA buffer as existing
+        ((canbus_private_t *)(object->private))->buffer_exists_ |= (1<<i);
+    }
     
     // Set mode to DISABLE
     ((canbus_cictrl1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCTRL1))->reqop \
@@ -2284,22 +2331,35 @@ static int canbus_connect(canbus_t *object,
 
     // Check for valid buffer_num
     // Only buffers 0-14 and FIFO are valid, cannot be buffers 15-31, NONE, or ALL
-    if( buffer_num >= CANBUS_BUFFER_B15 )
+    if( buffer_num >= CANBUS_BUFFER_B15 && buffer_num != CANBUS_BUFFER_FIFO )
     {// Buffer is invalid
         return CANBUS_E_INPUT;
     }
 
     // Check if buffer pointer points to a buffer in the FIFO region
-    if( buffer_num >= ((canbus_private_t *)(object->private))->attr_.fifo_start )
+    if( buffer_num >= ((canbus_private_t *)(object->private))->attr_.fifo_start \
+        && buffer_num != CANBUS_BUFFER_FIFO )
     {// Filter buffer pointer points to (or past) the FIFO region
         // Return an error
         return CANBUS_E_INPUT;
     }
 
-    // Check if buffer pointer points to a buffer currently opened as TX
+    // Check if buffer_num is marked as TX
     if( canbus.get_buffer_direction(object, buffer_num) == CANBUS_DIRECTION_TX )
     {// Buffer is marked as TX
         return CANBUS_E_INPUT;
+    }
+
+    // Set buffer_pointer
+    if( buffer_num == CANBUS_BUFFER_FIFO )
+    {// buffer_num is the FIFO buffer
+        // Set buffer_pointer to the hardware value for FIFO buffer pointer
+        buffer_pointer = 0x000F;
+    }
+    else
+    {// buffer_num is a buffer from 0-14
+        // Set buffer_pointer to the hardware value for the specific buffer (i.e. buffer_num)
+        buffer_pointer = buffer_num;
     }
 
     // Switch to filter window
@@ -2756,7 +2816,8 @@ int canbus_disconnect(canbus_t *object,
  * @param[in]  buffer_num The buffer to which to write the message.
  * @param[in]  message    A pointer to the message to write.
  * @param[in]  priority   The transmit priority of the message.
- * @return A @ref canbus_error_t value.
+ * @return A @ref canbus_error_t value or the number of messages written (i.e. <cc>0</cc> or
+ * <cc>1</cc>).
  *
  * @private
  */
@@ -2765,6 +2826,154 @@ static int canbus_write(canbus_t *object,
                         const canbus_message_t *message,
                         canbus_priority_t priority)
 {
+    unsigned int i=0;
+    
+    // Check for a valid object
+    if( !canbus.is_valid(object) )
+    {// Invalid object
+        return CANBUS_E_OBJECT;
+    }
+
+    // If buffer NONE is selected do nothing and exit
+    if( buffer_num == CANBUS_BUFFER_NONE )
+    {
+        return 0;
+    }
+    
+    // Only buffers 0-7 may be written to.
+    if( buffer_num >= CANBUS_BUFFER_B8 \
+        || buffer_num == CANBUS_BUFFER_FIFO \
+        || buffer_num == CANBUS_BUFFER_ALL )
+    {
+        return CANBUS_E_INPUT;
+    }
+
+    // Check if buffer exists
+    if( !canbus.buffer_exists(object, buffer_num) )
+    {// Buffer doesn't exist in DMA RAM
+        return CANBUS_E_WRITE;
+    }
+    
+    // Check that buffer_num is marked as TX
+    if( canbus.get_direction(object, buffer_num) != CANBUS_DIRECTION_TX )
+    {// Buffer is not marked TX
+        return CANBUS_E_WRITE;
+    }
+
+    // Check if the buffer is empty
+    if( !canbus.is_empty(object, buffer_num) )
+    {// Buffer has a message in it already
+        return CANBUS_E_AGAIN;
+    }
+
+    // Check if message is valid
+    if( message->dlc > 8 )
+    {// Invalid message
+        return CANBUS_E_INPUT;
+    }
+
+    // Write message to buffer
+    // Note: We can use buffer_num directly since the buffer must be 0-7 which maps directly.
+    // Write message buffer word 0
+    if( message->header.ide )
+    {// Message uses an extended ID
+        (((canbus_private_t *)(object->private))->tx_dma_->buffer_a + buffer_num*8) \
+            = (message->header.sid<<2) + 0x0003;
+    }
+    else
+    {// Message uses a standard ID
+        (((canbus_private_t *)(object->private))->tx_dma_->buffer_a + buffer_num*8) \
+            = (message->header.sid<<2);
+    }
+    
+    // Write message buffer word 1
+    (((canbus_private_t *)(object->private))->tx_dma_->buffer_a + buffer_num*8 + 1) \
+        = (message->header.eid_h<<10) + (message->header.eid_l>>6);
+
+    // Write message buffer word 2
+    (((canbus_private_t *)(object->private))->tx_dma_->buffer_a + buffer_num*8 + 2) \
+        = ((message->header.eid_l&0x003F)<<10) + message->dlc;
+
+    // Write message buffer words 3-6
+    for(i=0; i<4; ++i)
+    {
+        (((canbus_private_t *)(object->private))->tx_dma_->buffer_a + buffer_num*8 + 3+i) \
+            = (message->data[2*i+1]<<8) + message->data[2*i];
+    }
+
+    // Set CiTRmnCON bits
+    switch( buffer_num )
+    {
+    case CANBUS_BUFFER_B0:
+        // Set priority
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR01CON)) \
+            ->txmpri = priority;
+        // Mark as ready to transmit
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR01CON)) \
+            ->txreqm = 1;
+        break;
+    case CANBUS_BUFFER_B1:
+        // Set priority
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR01CON)) \
+            ->txnpri = priority;
+        // Mark as ready to transmit
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR01CON)) \
+            ->txreqn = 1;
+        break;
+    case CANBUS_BUFFER_B2:
+        // Set priority
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR23CON)) \
+            ->txmpri = priority;
+        // Mark as ready to transmit
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR23CON)) \
+            ->txreqm = 1;
+        break;
+    case CANBUS_BUFFER_B3:
+        // Set priority
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR23CON)) \
+            ->txnpri = priority;
+        // Mark as ready to transmit
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR23CON)) \
+            ->txreqn = 1;
+        break;
+    case CANBUS_BUFFER_B4:
+        // Set priority
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR45CON)) \
+            ->txmpri = priority;
+        // Mark as ready to transmit
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR45CON)) \
+            ->txreqm = 1;
+        break;
+    case CANBUS_BUFFER_B5:
+        // Set priority
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR45CON)) \
+            ->txnpri = priority;
+        // Mark as ready to transmit
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR45CON)) \
+            ->txreqn = 1;
+        break;
+    case CANBUS_BUFFER_B6:
+        // Set priority
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR67CON)) \
+            ->txmpri = priority;
+        // Mark as ready to transmit
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR67CON)) \
+            ->txreqm = 1;
+        break;
+    case CANBUS_BUFFER_B7:
+        // Set priority
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR67CON)) \
+            ->txnpri = priority;
+        // Mark as ready to transmit
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR67CON)) \
+            ->txreqn = 1;
+        break;
+    default:
+        // Invalid input (this shouldn't happen!)
+        return CANBUS_E_ASSERT;
+    }
+
+    return CANBUS_E_NONE;
 }
 
 /**
@@ -2775,7 +2984,7 @@ static int canbus_write(canbus_t *object,
  *
  * @param[in]  canbus     The canbus_t object to work on.
  * @param[in]  buffer_num The buffer from which to abort any transmissions.
- * @return A <cc>1</cc> if a message was successfully aborted, a <cc>0</cc> if there was no
+ * @return A <cc>true</cc> if a message was successfully aborted, a <cc>false</cc> if there was no
  * message in the buffer. If there was an error then a @ref canbus_error_t value.
  *
  * @private
@@ -2783,6 +2992,139 @@ static int canbus_write(canbus_t *object,
 static int canbus_abort_write(canbus_t *object,
                               canbus_buffer_t buffer_num)
 {
+    // Check for valid object
+    if( !canbus.is_valid(object) )
+    {// Invalid object
+        return CANBUS_E_OBJECT;
+    }
+
+    // If buffer NONE is selected do nothing and exit
+    if( buffer_num == CANBUS_BUFFER_NONE )
+    {
+        return false;
+    }
+    
+    // Only buffers 0-7 may be TX and therefore have a message to abort.
+    if( buffer_num >= CANBUS_BUFFER_B8 \
+        || buffer_num == CANBUS_BUFFER_FIFO \
+        || buffer_num == CANBUS_BUFFER_ALL )
+    {
+        return CANBUS_E_INPUT;
+    }
+
+    // Check if buffer exists
+    if( !canbus.buffer_exists(object, buffer_num) )
+    {// Buffer doesn't exist in DMA RAM
+        return CANBUS_E_INPUT;
+    }
+    
+    // Check that buffer_num is marked as TX
+    if( canbus.get_direction(object, buffer_num) != CANBUS_DIRECTION_TX )
+    {// Buffer is not marked TX
+        return CANBUS_E_INPUT;
+    }
+
+    // Check if the buffer is empty
+    if( canbus.is_empty(object, buffer_num) )
+    {// Buffer is empty
+        return false;
+    }
+
+    // Abort message
+    switch( buffer_num )
+    {
+    case CANBUS_BUFFER_B0:
+        // Abort message
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR01CON)) \
+            ->txabtm = priority;
+        // Wait for message to be aborted
+        while( ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                            + CANBUS_SFR_OFFSET_CiTR01CON))->txabtm == 1 )
+        {
+        }
+        return true;
+        break;
+    case CANBUS_BUFFER_B1:
+        // Abort message
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR01CON)) \
+            ->txabtn = priority;
+        // Wait for message to be aborted
+        while( ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                            + CANBUS_SFR_OFFSET_CiTR01CON))->txabtn == 1 )
+        {
+        }
+        return true;
+        break;
+    case CANBUS_BUFFER_B2:
+        // Abort message
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR23CON)) \
+            ->txabtm = priority;
+        // Wait for message to be aborted
+        while( ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                            + CANBUS_SFR_OFFSET_CiTR23CON))->txabtm == 1 )
+        {
+        }
+        return true;
+        break;
+    case CANBUS_BUFFER_B3:
+        // Abort message
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR23CON)) \
+            ->txabtn = priority;
+        // Wait for message to be aborted
+        while( ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                            + CANBUS_SFR_OFFSET_CiTR23CON))->txabtn == 1 )
+        {
+        }
+        return true;
+        break;
+    case CANBUS_BUFFER_B4:
+        // Abort message
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR45CON)) \
+            ->txabtm = priority;
+        // Wait for message to be aborted
+        while( ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                            + CANBUS_SFR_OFFSET_CiTR45CON))->txabtm == 1 )
+        {
+        }
+        return true;
+        break;
+    case CANBUS_BUFFER_B5:
+        // Abort message
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR45CON)) \
+            ->txabtn = priority;
+        // Wait for message to be aborted
+        while( ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                            + CANBUS_SFR_OFFSET_CiTR45CON))->txabtn == 1 )
+        {
+        }
+        return true;
+        break;
+    case CANBUS_BUFFER_B6:
+        // Abort message
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR67CON)) \
+            ->txabtm = priority;
+        // Wait for message to be aborted
+        while( ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                            + CANBUS_SFR_OFFSET_CiTR67CON))->txabtm == 1 )
+        {
+        }
+        return true;
+        break;
+    case CANBUS_BUFFER_B7:
+        // Abort message
+        ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR67CON)) \
+            ->txabtn = priority;
+        // Wait for message to be aborted
+        while( ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) \
+                                            + CANBUS_SFR_OFFSET_CiTR67CON))->txabtn == 1 )
+        {
+        }
+        return true;
+        break;
+    default:
+        // Invalid input (this shouldn't happen!)
+        return CANBUS_E_ASSERT;
+    }
 }
     
 /**
@@ -2793,10 +3135,7 @@ static int canbus_abort_write(canbus_t *object,
  * canbus_message_t pointer and a <cc>1</cc> is returned. If no message is available a
  * <cc>0</cc> is returned and the supplied message buffer is unaffected.
  *
- * A buffer may only receive messages if it meets three criteria:
- * 1. A filter buffer pointer points at it.
- * 2. The filter is enabled.
- * 3. The buffer has been opened as RX.
+ * A buffer may only receive messages if it is marked as TX and a filter has been connected to it.
  *
  * @param[in]  canbus      The canbus object from which to read.
  * @param[in]  buffer_num  The buffer from which to read.
@@ -2810,6 +3149,53 @@ static int canbus_read(canbus_t *object,
                        canbus_buffer_t buffer_num,
                        canbus_message_t *message)
 {
+    int return_value = 0;
+
+    return_value = canbus.peek(object, buffer_num, message)
+    if( return_value <= 0 )
+    {// There was an error during peek() or there was no message to read
+        return return_value;
+    }// Otherwise a message was read into the message pointer, so mark the buffer as read
+
+    // Since peek() checked the validity of the inputs we can assume they are valid
+        
+    // Mark the buffer as read
+    // Treat the special case of reading from the FIFO
+    if( buffer_num == CANBUS_BUFFER_FIFO )
+    {// Mark the correct FIFO buffer as read
+        // Check which CiRXFUL SFR to use
+        if( (((canbus_cififo_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFIFO)) \
+             ->fnrb) <= 0x000F )
+        {// Use CiRXFUL1
+            // Clear correct RXFUL bit
+            *(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXFUL1) \
+                &= ~(1<<((canbus_cififo_bits_t *)(CANBUS_BASE_ADDRESS(object) + \
+                                                  CANBUS_SFR_OFFSET_CiFIFO))->fnrb);
+        }
+        else
+        {// Use CiRXFUL2
+            // Clear correct RXFUL bit
+            *(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXFUL2) \
+                &= ~(1<<(((canbus_cififo_bits_t *)(CANBUS_BASE_ADDRESS(object) + \
+                                                   CANBUS_SFR_OFFSET_CiFIFO))->fnrb) - 16);
+        }
+    }
+    else
+    {// Mark the correct buffer as read
+        // Check which CiRXFUL SFR to use
+        if( buffer_num <= CANBUS_BUFFER_B15 )
+        {// Use CiRXFUL1
+            // Clear correct RXFUL bit
+            *(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXFUL1) &= ~(1<<buffer_num);
+        }
+        else
+        {// Use CiRXFUL1
+            // Clear correct RXFUL bit
+            *(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXFUL2) &= ~(1<<(buffer_num-16));
+        }
+    }
+
+    return 1;
 }
 
 /**
@@ -2831,6 +3217,100 @@ static int canbus_peek(canbus_t *object,
                        canbus_buffer_t buffer_num,
                        canbus_message_t *message)
 {
+    unsigned int i;
+    volatile unsigned int *buffer_ptr = NULL;
+    
+    // Check for valid object
+    if( !canbus.is_valid(object) )
+    {// Invalid object
+        return CANBUS_E_OBJECT;
+    }
+
+    // May only read from buffers 0-31 and FIFO, not ALL or NONE
+    if( buffer_num == CANBUS_BUFFER_ALL || buffer_num == CANBUS_BUFFER_NONE )
+    {
+        return CANBUS_E_INPUT;
+    }
+
+    // Check if buffer exists
+    if( !canbus.buffer_exists(object, buffer_num) )
+    {// Buffer doesn't exist in DMA RAM
+        return CANBUS_E_INPUT;
+    }
+    
+    // Check that buffer_num is marked as RX
+    if( canbus.get_direction(object, buffer_num) != CANBUS_DIRECTION_RX )
+    {// Buffer is not marked RX
+        return CANBUS_E_INPUT;
+    }
+
+    // Check if buffer is part of FIFO region
+    if( buffer_num >= ((canbus_private_t *)(object->private))->attr_.fifo_start \
+        && buffer_num != CANBUS_BUFFER_FIFO )
+    {// Filter buffer pointer points to a buffer in or past the FIFO region
+        // Return an error
+        return CANBUS_E_INPUT;
+    }
+
+    // Check if the buffer is empty
+    if( canbus.is_empty(object, buffer_num) )
+    {// Buffer is empty
+        // No message to read
+        return 0;
+    }
+
+    // Treat the special case of reading from the FIFO
+    if( buffer_num == CANBUS_BUFFER_FIFO )
+    {// Read from the FIFO buffer
+        // Read from the buffer specified by CiFIFO.FNRB (i.e. next read buffer)
+        buffer_ptr = ((canbus_private_t *)(object->private))->rx_dma_->buffer_a + \
+            (((canbus_cififo_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFIFO)) \
+             ->fnrb) * 8;
+    }
+    else
+    {// Read from a normal buffer
+        // Read from the buffer specified by buffer_num
+        buffer_ptr = ((canbus_private_t *)(object->private))->rx_dma_->buffer_a + (buffer_num*8);
+    }
+
+    // Read message contained in buffer_ptr
+    // Check if the message is extended or standard
+    if( *buffer_start & (0x0001) )
+    {// IDE bit is set (i.e. extended message ID)
+        message->header.ide = 1;
+        message->header.sid = ((*buffer_ptr)&0x1FFC)>>2;
+        message->header.eid = ((*(buffer_ptr+1))&0x0FFF)<<6 + ((*(buffer_ptr+2))&0xFC00)>>10;
+        message->header.rtr = ((*(buffer_ptr+2))&0x0200)>>9;
+    }
+    else
+    {// IDE bit is not set (i.e. standard message ID)
+        message->header.ide = 0;
+        message->header.sid = ((*buffer_ptr)&0x1FFC)>>2;
+        message->header.rtr = ((*buffer_ptr)&0x0002)>>1;
+    }
+
+    // Read the data length code
+    message->dlc = ((*(buffer_ptr+2))&0x000F);
+
+    // Read in the data characters
+    for(i=0; i<message->dlc; ++i)
+    {
+        if( i%2 == 0 )
+        {// Even data character
+            // Read lower byte of message data
+            message->data[i] = ((*(buffer_ptr+(i/2)+3))&0x00FF);
+        }
+        else
+        {// Odd data character
+            // Read upper byte of message data
+            message->data[i] = ((*(buffer_ptr+(i/2)+3))&0xFF00)>>8;
+        }
+    }
+
+    // Read the filter that enabled the message to be received
+    message->filter = ((*(buffer_ptr+7))&01F00)>>8;
+
+    return 1;
 }
 
 /**
@@ -2847,6 +3327,127 @@ static int canbus_peek(canbus_t *object,
 static bool canbus_is_empty(canbus_t *object,
                             canbus_buffer_t buffer_num)
 {
+}
+
+/**
+ * @brief Check if a buffer exists in DMA RAM.
+ *
+ * @details Nothing here.
+ *
+ * @private
+ */
+static bool canbus_buffer_exists(canbus_t *object,
+                                     canbus_buffer_t buffer_num)
+{
+    // Check for a valid object
+    if( !canbus.is_valid(object) )
+    {// Invalid object
+        return CANBUS_E_OBJECT;
+    }
+
+    // Check if buffer exists
+    switch( buffer_num )
+    {
+    case CANBUS_BUFFER_B0:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b0_exists;
+
+    case CANBUS_BUFFER_B1:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b1_exists;
+
+    case CANBUS_BUFFER_B2:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b2_exists;
+        
+    case CANBUS_BUFFER_B3:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b3_exists;
+        
+    case CANBUS_BUFFER_B4:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b4_exists;
+        
+    case CANBUS_BUFFER_B5:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b5_exists;
+        
+    case CANBUS_BUFFER_B6:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b6_exists;
+        
+    case CANBUS_BUFFER_B7:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b7_exists;
+        
+    case CANBUS_BUFFER_B8:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b8_exists;
+        
+    case CANBUS_BUFFER_B9:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b9_exists;
+
+    case CANBUS_BUFFER_B10:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b10_exists;
+        
+    case CANBUS_BUFFER_B11:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b11_exists;
+        
+    case CANBUS_BUFFER_B12:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b12_exists;
+        
+    case CANBUS_BUFFER_B13:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b13_exists;
+        
+    case CANBUS_BUFFER_B14:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b14_exists;
+        
+    case CANBUS_BUFFER_B15:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b15_exists;
+        
+    case CANBUS_BUFFER_B16:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b16_exists;
+        
+    case CANBUS_BUFFER_B17:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b17_exists;
+        
+    case CANBUS_BUFFER_B18:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b18_exists;
+        
+    case CANBUS_BUFFER_B19:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b19_exists;
+        
+    case CANBUS_BUFFER_B20:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b20_exists;
+        
+    case CANBUS_BUFFER_B21:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b21_exists;
+        
+    case CANBUS_BUFFER_B22:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b22_exists;
+        
+    case CANBUS_BUFFER_B23:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b23_exists;
+        
+    case CANBUS_BUFFER_B24:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b24_exists;
+        
+    case CANBUS_BUFFER_B25:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b25_exists;
+        
+    case CANBUS_BUFFER_B26:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b26_exists;
+        
+    case CANBUS_BUFFER_B27:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b27_exists;
+        
+    case CANBUS_BUFFER_B28:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b28_exists;
+        
+    case CANBUS_BUFFER_B29:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b29_exists;
+
+    case CANBUS_BUFFER_B30:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b30_exists;
+        
+    case CANBUS_BUFFER_B31:
+        return ((canbus_private_t *)(object->private))->buffer_exists_.b31_exists;
+        
+    default:
+        // Invalid input
+        return false;
+    }
 }
 
 /**
