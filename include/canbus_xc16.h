@@ -438,9 +438,10 @@ typedef enum canbus_error_e
     CANBUS_E_NONE   = 0,  /**< No error, success. */
     CANBUS_E_AGAIN  = -1, /**< Resource currently in use, try again later. */
     CANBUS_E_OBJECT = -2, /**< Canbus object was invalid or not usable. */
-    CANBUS_E_ALLOC  = -3, /**< Allocation of dynamic memory failed. */
-    CANBUS_E_WRITE  = -4, /**< Writing to the buffer failed. */
-    CANBUS_E_READ   = -5, /**< Reading from the buffer failed. */
+    CANBUS_E_INPUT  = -3, /**< Input was invalid or not usable. */
+    CANBUS_E_ALLOC  = -4, /**< Allocation of dynamic memory failed. */
+    CANBUS_E_WRITE  = -5, /**< Writing to the buffer failed. */
+    CANBUS_E_READ   = -6, /**< Reading from the buffer failed. */
     
     CANBUS_E_ASSERT  = 0x8001, /**< Assertion failed! This is generally an unrecoverable error. */
     CANBUS_E_UNKNOWN = 0x8000  /**< Unknown error! This is generally an unrecoverable error. */
@@ -483,7 +484,7 @@ struct canbus_header_s
     int ide :1;  /**< The extended ID enable bit. */
     union
     {
-        int eid :18; /**< The extend ID of a message (18-bits). */
+        long eid :18; /**< The extend ID of a message (18-bits). */
         struct
         {
             int eid_l :16;
@@ -537,7 +538,7 @@ struct canbus_attr_s
 {
     union
     {
-        int bit_timing :19;
+        long bit_timing :19;
         struct
         {
             int bit_timing_pre             :6;
@@ -647,7 +648,6 @@ struct canbus_s
      */
     void *private;
 };
-typedef struct canbus_s canbus_t;
 
 /**
  * @brief A storage container for the public function pointers of a CAN bus object.
@@ -925,6 +925,7 @@ struct canbus_global_s
     void (* const isr)(canbus_t *object);
     
 };
+typedef struct canbus_global_s canbus_global_t;
 
 /* ***** Declare Global Canbus Object ***** */
 extern canbus_global_t canbus;
