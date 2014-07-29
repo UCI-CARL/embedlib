@@ -879,7 +879,7 @@ static int canbus_init(canbus_t *object,
                        canbus_attr_t *attr,
                        unsigned int tx_dma_channel,
                        unsigned int rx_dma_channel,
-                       volatile unsigned int *dma_buffer,
+                       volatile unsigned int dma_buffer[][8],
                        unsigned int dma_buffer_length);
 static int canbus_set_mode(canbus_t *object,
                            canbus_mode_t mode);
@@ -962,7 +962,7 @@ static int canbus_init(canbus_t *object,
                        canbus_attr_t *attr,
                        unsigned int tx_dma_channel,
                        unsigned int rx_dma_channel,
-                       volatile unsigned int *dma_buffer,
+                       volatile unsigned int dma_buffer[][8],
                        unsigned int dma_buffer_length)
 {
     unsigned int i;
@@ -1109,37 +1109,37 @@ from 1 to 2."
 
     // Set hardware bit timing
     ((canbus_cicfg1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCFG1))->brp \
-        = ((canbus_private_t *)(object->private))->attr_.bit_timing_pre;
+        = ((canbus_private_t *)(object->private))->attr_.bit_timing.pre;
     ((canbus_cicfg1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCFG1))->sjw \
-        = ((canbus_private_t *)(object->private))->attr_.bit_timing_sync_jump;
+        = ((canbus_private_t *)(object->private))->attr_.bit_timing.sync_jump;
     ((canbus_cicfg2_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCFG2))->prseg \
-        = ((canbus_private_t *)(object->private))->attr_.bit_timing_prop_seg;
+        = ((canbus_private_t *)(object->private))->attr_.bit_timing.prop_seg;
     ((canbus_cicfg2_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCFG2))->seg1ph \
-        = ((canbus_private_t *)(object->private))->attr_.bit_timing_phase_seg1;
-    if( ((canbus_private_t *)(object->private))->attr_.bit_timing_phase_seg2_prog \
+        = ((canbus_private_t *)(object->private))->attr_.bit_timing.phase_seg1;
+    if( ((canbus_private_t *)(object->private))->attr_.bit_timing.phase_seg2_prog \
         == CANBUS_BIT_TIMING_PHASE_SEG2_PROG_EN )
     {
         ((canbus_cicfg2_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCFG2)) \
             ->seg2phts = CANBUS_BIT_TIMING_PHASE_SEG2_PROG_EN;
         ((canbus_cicfg2_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCFG2)) \
-            ->seg2ph = ((canbus_private_t *)(object->private))->attr_.bit_timing_phase_seg2_prog;
+            ->seg2ph = ((canbus_private_t *)(object->private))->attr_.bit_timing.phase_seg2_prog;
     }
     ((canbus_cicfg2_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCFG2))->sam \
-        = ((canbus_private_t *)(object->private))->attr_.bit_timing_sample;
+        = ((canbus_private_t *)(object->private))->attr_.bit_timing.sample;
 
     // Set module configuration
-    if( ((canbus_private_t *)(object->private))->attr_.module_wakeup == CANBUS_MODULE_WAKEUP_EN )
+    if( ((canbus_private_t *)(object->private))->attr_.module.wakeup == CANBUS_MODULE_WAKEUP_EN )
     {
         ((canbus_cicfg2_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCFG1)) \
             ->wakfil = 1;
     }
-    if( ((canbus_private_t *)(object->private))->attr_.module_cpuidle \
+    if( ((canbus_private_t *)(object->private))->attr_.module.cpuidle \
         == CANBUS_MODULE_CPUIDLE_STOP )
     {
         ((canbus_cictrl1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCTRL1)) \
             ->csidl = 1;
     }
-    if( ((canbus_private_t *)(object->private))->attr_.module_timestamp \
+    if( ((canbus_private_t *)(object->private))->attr_.module.timestamp \
         == CANBUS_MODULE_TIMESTAMP_EN )
     {
         ((canbus_cictrl1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCTRL1)) \
@@ -1171,9 +1171,9 @@ from 1 to 2."
     *((unsigned int *)(&((canbus_private_t *)(object->private))->rx_dma_->channel_number)) = rx_dma_channel;
 
     // Set DMA buffer pointers and lengths
-    *((volatile unsigned int **)(&((canbus_private_t *)(object->private))->tx_dma_->buffer_a)) = dma_buffer;
+    *((volatile unsigned int **)(&((canbus_private_t *)(object->private))->tx_dma_->buffer_a)) = (volatile unsigned int *)dma_buffer;
     *((unsigned int *)(&((canbus_private_t *)(object->private))->tx_dma_->buffer_a_size)) = dma_buffer_length;
-    *((volatile unsigned int **)(&((canbus_private_t *)(object->private))->rx_dma_->buffer_a)) = dma_buffer;
+    *((volatile unsigned int **)(&((canbus_private_t *)(object->private))->rx_dma_->buffer_a)) = (volatile unsigned int *)dma_buffer;
     *((unsigned int *)(&((canbus_private_t *)(object->private))->rx_dma_->buffer_a_size)) = dma_buffer_length;
     
     
@@ -1242,7 +1242,7 @@ from 1 to 2."
     // Set start of FIFO buffer
     // Start calculation of last FIFO buffer by getting start buffer of FIFO
     /** @todo Remove CANBUS_FIFO_START_Bx enum and use CANBUS_BUFFER_Bx enum instead */
-    switch( ((canbus_private_t *)(object->private))->attr_.fifo_start )
+    switch( ((canbus_private_t *)(object->private))->attr_.fifo.start )
     {
     case CANBUS_FIFO_START_B0:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
@@ -1395,7 +1395,7 @@ from 1 to 2."
         return CANBUS_E_INPUT;
     }
     
-    switch( ((canbus_private_t *)(object->private))->attr_.fifo_length )
+    switch( ((canbus_private_t *)(object->private))->attr_.fifo.length )
     {
     case CANBUS_FIFO_LENGTH_4:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
@@ -1450,7 +1450,7 @@ from 1 to 2."
 
     // Set buffer directions
     // Set B0 direction
-    if( ((canbus_private_t *)(object->private))->attr_.b0_dir == CANBUS_DIRECTION_TX \
+    if( ((canbus_private_t *)(object->private))->attr_.buffer_dir.b0 == CANBUS_DIRECTION_TX \
         && first_fifo_buffer == 0 )
     {// B0 is TX and is part of FIFO
         // Buffers in FIFO must not be TX
@@ -1460,10 +1460,10 @@ from 1 to 2."
     else
     {// B0 is not part of FIFO or is marked RX
         ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR01CON)) \
-            ->txenm = ((canbus_private_t *)(object->private))->attr_.b0_dir;
+            ->txenm = ((canbus_private_t *)(object->private))->attr_.buffer_dir.b0;
     }
     // Set B1 direction
-    if( ((canbus_private_t *)(object->private))->attr_.b1_dir == CANBUS_DIRECTION_TX \
+    if( ((canbus_private_t *)(object->private))->attr_.buffer_dir.b1 == CANBUS_DIRECTION_TX \
         && first_fifo_buffer <= 1 )
     {// B1 is TX and is part of FIFO
         // Buffers in FIFO must not be TX
@@ -1473,10 +1473,10 @@ from 1 to 2."
     else
     {// B1 is not part of FIFO or is marked RX
         ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR01CON)) \
-            ->txenn = ((canbus_private_t *)(object->private))->attr_.b1_dir;
+            ->txenn = ((canbus_private_t *)(object->private))->attr_.buffer_dir.b1;
     }
     // Set B2 direction
-    if( ((canbus_private_t *)(object->private))->attr_.b2_dir == CANBUS_DIRECTION_TX \
+    if( ((canbus_private_t *)(object->private))->attr_.buffer_dir.b2 == CANBUS_DIRECTION_TX \
         && first_fifo_buffer <= 2 )
     {// B2 is TX and is part of FIFO
         // Buffers in FIFO must not be TX
@@ -1486,10 +1486,10 @@ from 1 to 2."
     else
     {// B2 is not part of FIFO or is marked RX
         ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR23CON)) \
-            ->txenm = ((canbus_private_t *)(object->private))->attr_.b2_dir;
+            ->txenm = ((canbus_private_t *)(object->private))->attr_.buffer_dir.b2;
     }
     // Set B3 direction
-    if( ((canbus_private_t *)(object->private))->attr_.b3_dir == CANBUS_DIRECTION_TX \
+    if( ((canbus_private_t *)(object->private))->attr_.buffer_dir.b3 == CANBUS_DIRECTION_TX \
         && first_fifo_buffer <= 3 )
     {// B3 is TX and is part of FIFO
         // Buffers in FIFO must not be TX
@@ -1499,10 +1499,10 @@ from 1 to 2."
     else
     {// B3 is not part of FIFO or is marked RX
         ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR23CON)) \
-            ->txenn = ((canbus_private_t *)(object->private))->attr_.b3_dir;
+            ->txenn = ((canbus_private_t *)(object->private))->attr_.buffer_dir.b3;
     }
     // Set B4 direction
-    if( ((canbus_private_t *)(object->private))->attr_.b4_dir == CANBUS_DIRECTION_TX \
+    if( ((canbus_private_t *)(object->private))->attr_.buffer_dir.b4 == CANBUS_DIRECTION_TX \
         && first_fifo_buffer <= 4 )
     {// B4 is TX and is part of FIFO
         // Buffers in FIFO must not be TX
@@ -1512,10 +1512,10 @@ from 1 to 2."
     else
     {// B4 is not part of FIFO or is marked RX
         ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR45CON)) \
-            ->txenm = ((canbus_private_t *)(object->private))->attr_.b4_dir;
+            ->txenm = ((canbus_private_t *)(object->private))->attr_.buffer_dir.b4;
     }
     // Set B5 direction
-    if( ((canbus_private_t *)(object->private))->attr_.b5_dir == CANBUS_DIRECTION_TX \
+    if( ((canbus_private_t *)(object->private))->attr_.buffer_dir.b5 == CANBUS_DIRECTION_TX \
         && first_fifo_buffer <= 5 )
     {// B5 is TX and is part of FIFO
         // Buffers in FIFO must not be TX
@@ -1525,10 +1525,10 @@ from 1 to 2."
     else
     {// B5 is not part of FIFO or is marked RX
         ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR45CON)) \
-            ->txenn = ((canbus_private_t *)(object->private))->attr_.b5_dir;
+            ->txenn = ((canbus_private_t *)(object->private))->attr_.buffer_dir.b5;
     }
     // Set B6 direction
-    if( ((canbus_private_t *)(object->private))->attr_.b6_dir == CANBUS_DIRECTION_TX \
+    if( ((canbus_private_t *)(object->private))->attr_.buffer_dir.b6 == CANBUS_DIRECTION_TX \
         && first_fifo_buffer <= 6 )
     {// B6 is TX and is part of FIFO
         // Buffers in FIFO must not be TX
@@ -1538,10 +1538,10 @@ from 1 to 2."
     else
     {// B6 is not part of FIFO or is marked RX
         ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR67CON)) \
-            ->txenm = ((canbus_private_t *)(object->private))->attr_.b6_dir;
+            ->txenm = ((canbus_private_t *)(object->private))->attr_.buffer_dir.b6;
     }
     // Set B7 direction
-    if( ((canbus_private_t *)(object->private))->attr_.b7_dir == CANBUS_DIRECTION_TX \
+    if( ((canbus_private_t *)(object->private))->attr_.buffer_dir.b7 == CANBUS_DIRECTION_TX \
         && first_fifo_buffer <= 7 )
     {// B7 is TX and is part of FIFO
         // Buffers in FIFO must not be TX
@@ -1551,7 +1551,7 @@ from 1 to 2."
     else
     {// B7 is not part of FIFO or is marked RX
         ((canbus_citrmncon_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiTR67CON)) \
-            ->txenn = ((canbus_private_t *)(object->private))->attr_.b7_dir;
+            ->txenn = ((canbus_private_t *)(object->private))->attr_.buffer_dir.b7;
     }
 
     // Buffers for which there is space in DMA "exist"
@@ -2352,7 +2352,7 @@ static int canbus_connect(canbus_t *object,
     }
 
     // Check if buffer pointer points to a buffer in the FIFO region
-    if( buffer_num >= ((canbus_private_t *)(object->private))->attr_.fifo_start \
+    if( buffer_num >= ((canbus_private_t *)(object->private))->attr_.fifo.start \
         && buffer_num != CANBUS_BUFFER_FIFO )
     {// Filter buffer pointer points to (or past) the FIFO region
         // Return an error
@@ -3260,7 +3260,7 @@ static int canbus_peek(canbus_t *object,
     }
 
     // Check if buffer is part of FIFO region
-    if( buffer_num >= ((canbus_private_t *)(object->private))->attr_.fifo_start \
+    if( buffer_num >= ((canbus_private_t *)(object->private))->attr_.fifo.start \
         && buffer_num != CANBUS_BUFFER_FIFO )
     {// Filter buffer pointer points to a buffer in or past the FIFO region
         // Return an error
@@ -3361,7 +3361,7 @@ static bool canbus_is_empty(canbus_t *object,
     }
 
     // Check if buffer is part of FIFO region
-    if( buffer_num >= ((canbus_private_t *)(object->private))->attr_.fifo_start \
+    if( buffer_num >= ((canbus_private_t *)(object->private))->attr_.fifo.start \
         && buffer_num != CANBUS_BUFFER_FIFO )
     {// Filter buffer pointer points to a buffer in or past the FIFO region
         // Return an error
@@ -3631,35 +3631,35 @@ int canbus_get_direction(canbus_t *object,
     }
     else if( buffer_num == CANBUS_BUFFER_B0 )
     {// Return buffer 0 direction
-        return ((canbus_private_t *)(object->private))->attr_.b0_dir;
+        return ((canbus_private_t *)(object->private))->attr_.buffer_dir.b0;
     }
     else if( buffer_num == CANBUS_BUFFER_B1 )
     {// Return buffer 1 direction
-        return ((canbus_private_t *)(object->private))->attr_.b1_dir;
+        return ((canbus_private_t *)(object->private))->attr_.buffer_dir.b1;
     }
     else if( buffer_num == CANBUS_BUFFER_B2 )
     {// Return buffer 2 direction
-        return ((canbus_private_t *)(object->private))->attr_.b2_dir;
+        return ((canbus_private_t *)(object->private))->attr_.buffer_dir.b2;
     }
     else if( buffer_num == CANBUS_BUFFER_B3 )
     {// Return buffer 3 direction
-        return ((canbus_private_t *)(object->private))->attr_.b3_dir;
+        return ((canbus_private_t *)(object->private))->attr_.buffer_dir.b3;
     }
     else if( buffer_num == CANBUS_BUFFER_B4 )
     {// Return buffer 4 direction
-        return ((canbus_private_t *)(object->private))->attr_.b4_dir;
+        return ((canbus_private_t *)(object->private))->attr_.buffer_dir.b4;
     }
     else if( buffer_num == CANBUS_BUFFER_B5 )
     {// Return buffer 5 direction
-        return ((canbus_private_t *)(object->private))->attr_.b5_dir;
+        return ((canbus_private_t *)(object->private))->attr_.buffer_dir.b5;
     }
     else if( buffer_num == CANBUS_BUFFER_B6 )
     {// Return buffer 6 direction
-        return ((canbus_private_t *)(object->private))->attr_.b6_dir;
+        return ((canbus_private_t *)(object->private))->attr_.buffer_dir.b6;
     }
     else if( buffer_num == CANBUS_BUFFER_B7 )
     {// Return buffer 7 direction
-        return ((canbus_private_t *)(object->private))->attr_.b7_dir;
+        return ((canbus_private_t *)(object->private))->attr_.buffer_dir.b7;
     }
     else
     {// Unknown input

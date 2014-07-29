@@ -534,59 +534,39 @@ typedef struct canbus_message_s canbus_message_t;
  *
  * @public
  */
-struct canbus_attr_s
-{
-    union
-    {
-        long bit_timing :19;
-        struct
-        {
-            int bit_timing_pre             :6;
-            int bit_timing_sync_jump       :2;
-            int bit_timing_prop_seg        :3;
-            int bit_timing_phase_seg1      :3;
-            int bit_timing_phase_seg2      :3;
-            int bit_timing_phase_seg2_prog :1;
-            int bit_timing_sample          :1;
-        };
-    };
+struct canbus_attr_s {
 
-    union
-    {
-        int module :3;
-        struct
-        {
-            int module_wakeup    :1;
-            int module_cpuidle   :1;
-            int module_timestamp :1;
-        };
-    };
+    struct {
+        int pre             :6;
+        int sync_jump       :2;
+        int prop_seg        :3;
+        int phase_seg1      :3;
+        int phase_seg2      :3;
+        int phase_seg2_prog :1;
+        int sample          :1;
+    } bit_timing;
 
-    union
-    {
-        int fifo :8;
-        struct
-        {
-            int fifo_start :5;
-            int fifo_length :3;
-        };
-    };
+    struct {
+        int wakeup    :1;
+        int cpuidle   :1;
+        int timestamp :1;
+    } module;
 
-    union
-    {
-        int buffer_dir :8;
-        struct
-        {
-            int b0_dir :1;
-            int b1_dir :1;
-            int b2_dir :1;
-            int b3_dir :1;
-            int b4_dir :1;
-            int b5_dir :1;
-            int b6_dir :1;
-            int b7_dir :1;
-        };
-    };
+    struct {
+        int start  :5;
+        int length :3;
+    } fifo;
+
+    struct {
+        int b0 :1;
+        int b1 :1;
+        int b2 :1;
+        int b3 :1;
+        int b4 :1;
+        int b5 :1;
+        int b6 :1;
+        int b7 :1;
+    } buffer_dir;
 };
 typedef struct canbus_attr_s canbus_attr_t;
 
@@ -677,7 +657,7 @@ struct canbus_global_s
                        canbus_attr_t *attr,
                        unsigned int tx_dma_channel,
                        unsigned int rx_dma_channel,
-                       volatile unsigned int *dma_buffer,
+                       volatile unsigned int dma_buffer[][8],
                        unsigned int dma_buffer_length);
     
     /**
