@@ -334,7 +334,6 @@ int dma_init(dma_channel_t *dma_channel,
     // Set DMAxPAD register (peripheral address the DMA transfer writes to/reads from)
     *(DMA_GET_BASE_ADDRESS(dma_channel) + DMA_SFR_OFFSET_DMAxPAD) \
         = (volatile unsigned int)attr->peripheral_address;
-
     
     // Return successfully
     return DMA_E_NONE;

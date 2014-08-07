@@ -17,8 +17,6 @@
 
 // Microchip peripheral libraries
 #include <xc.h>
-#include <pps.h>
-#include <dma_channel.h>
 
 // Include board information
 #include <board.def>
@@ -432,271 +430,271 @@ enum canbus_opmode_e
 
 struct canbus_cictrl1_bits_s
 {
-    int win :1;
-    int :2;
-    int cancap :1;
-    int :1;
-    int opmode :3;
-    int reqop :3;
-    int :1;
-    int abat :1;
-    int csidl :1;
-    int :2;
+    unsigned int win :1;
+    unsigned int :2;
+    unsigned int cancap :1;
+    unsigned int :1;
+    unsigned int opmode :3;
+    unsigned int reqop :3;
+    unsigned int :1;
+    unsigned int abat :1;
+    unsigned int csidl :1;
+    unsigned int :2;
 };
 typedef struct canbus_cictrl1_bits_s canbus_cictrl1_bits_t;
 
 struct canbus_cictrl2_bits_s
 {
-    int dncnt :5;
-    int :11;
+    unsigned int dncnt :5;
+    unsigned int :11;
 };
 typedef struct canbus_cictrl2_bits_s canbus_cictrl2_bits_t;
 
 struct canbus_civec_bits_s
 {
-    int icode :7;
-    int :1;
-    int filhit :5;
-    int :3;
+    unsigned int icode :7;
+    unsigned int :1;
+    unsigned int filhit :5;
+    unsigned int :3;
 };
 typedef struct canbus_civec_bits_s canbus_civec_bits_t;
 
 struct canbus_cifctrl_bits_s
 {
-    int fsa :5;
-    int :8;
-    int dmabs :3;
+    unsigned int fsa :5;
+    unsigned int :8;
+    unsigned int dmabs :3;
 };
 typedef struct canbus_cifctrl_bits_s canbus_cifctrl_bits_t;
 
 struct canbus_cififo_bits_s
 {
-    int fnrb :6;
-    int :2;
-    int fbp :6;
-    int :2;
+    unsigned int fnrb :6;
+    unsigned int :2;
+    unsigned int fbp :6;
+    unsigned int :2;
 };
 typedef struct canbus_cififo_bits_s canbus_cififo_bits_t;
 
 struct canbus_ciintf_bits_s
 {
-    int tbif :1;
-    int rbif :1;
-    int rbovif :1;
-    int fifoif :1;
-    int :1;
-    int errif :1;
-    int wakif :1;
-    int ivrif :1;
-    int ewarn :1;
-    int rxwar :1;
-    int txwar :1;
-    int rxbp :1;
-    int txbp :1;
-    int txbo :1;
-    int :2;
+    unsigned int tbif :1;
+    unsigned int rbif :1;
+    unsigned int rbovif :1;
+    unsigned int fifoif :1;
+    unsigned int :1;
+    unsigned int errif :1;
+    unsigned int wakif :1;
+    unsigned int ivrif :1;
+    unsigned int ewarn :1;
+    unsigned int rxwar :1;
+    unsigned int txwar :1;
+    unsigned int rxbp :1;
+    unsigned int txbp :1;
+    unsigned int txbo :1;
+    unsigned int :2;
 };
 typedef struct canbus_ciintf_bits_s canbus_ciintf_bits_t;
 
 struct canbus_ciinte_bits_s
 {
-    int tbie :1;
-    int rbie :1;
-    int rbovie :1;
-    int fifoie :1;
-    int :1;
-    int errie :1;
-    int wakie :1;
-    int ivrie :1;
-    int :8;
+    unsigned int tbie :1;
+    unsigned int rbie :1;
+    unsigned int rbovie :1;
+    unsigned int fifoie :1;
+    unsigned int :1;
+    unsigned int errie :1;
+    unsigned int wakie :1;
+    unsigned int ivrie :1;
+    unsigned int :8;
 };
 typedef struct canbus_ciinte_bits_s canbus_ciinte_bits_t;
 
 struct canbus_ciec_bits_s
 {
-    int rerrcnt :8;
-    int terrcnt :8;
+    unsigned int rerrcnt :8;
+    unsigned int terrcnt :8;
 };
 typedef struct canbus_ciec_bits_s canbus_ciec_bits_t;
 
 struct canbus_cicfg1_bits_s
 {
-    int brp :6;
-    int sjw :2;
-    int :8;
+    unsigned int brp :6;
+    unsigned int sjw :2;
+    unsigned int :8;
 };
 typedef struct canbus_cicfg1_bits_s canbus_cicfg1_bits_t;
 
 struct canbus_cicfg2_bits_s
 {
-    int prseg :3;
-    int seg1ph :3;
-    int sam :1;
-    int seg2phts :1;
-    int seg2ph :3;
-    int :3;
-    int wakfil :1;
-    int :1;
+    unsigned int prseg :3;
+    unsigned int seg1ph :3;
+    unsigned int sam :1;
+    unsigned int seg2phts :1;
+    unsigned int seg2ph :3;
+    unsigned int :3;
+    unsigned int wakfil :1;
+    unsigned int :1;
 };
 typedef struct canbus_cicfg2_bits_s canbus_cicfg2_bits_t;
 
 struct canbus_cifen1_bits_s
 {
-    int flten0 :1;
-    int flten1 :1;
-    int flten2 :1;
-    int flten3 :1;
-    int flten4 :1;
-    int flten5 :1;
-    int flten6 :1;
-    int flten7 :1;
-    int flten8 :1;
-    int flten9 :1;
-    int flten10 :1;
-    int flten11 :1;
-    int flten12 :1;
-    int flten13 :1;
-    int flten14 :1;
-    int flten15 :1;
+    unsigned int flten0 :1;
+    unsigned int flten1 :1;
+    unsigned int flten2 :1;
+    unsigned int flten3 :1;
+    unsigned int flten4 :1;
+    unsigned int flten5 :1;
+    unsigned int flten6 :1;
+    unsigned int flten7 :1;
+    unsigned int flten8 :1;
+    unsigned int flten9 :1;
+    unsigned int flten10 :1;
+    unsigned int flten11 :1;
+    unsigned int flten12 :1;
+    unsigned int flten13 :1;
+    unsigned int flten14 :1;
+    unsigned int flten15 :1;
 };
 typedef struct canbus_cifen1_bits_s canbus_cifen1_bits_t;
 
 struct canbus_cifmsksel1_bits_s
 {
-    int f0msk :2;
-    int f1msk :2;
-    int f2msk :2;
-    int f3msk :2;
-    int f4msk :2;
-    int f5msk :2;
-    int f6msk :2;
-    int f7msk :2;
+    unsigned int f0msk :2;
+    unsigned int f1msk :2;
+    unsigned int f2msk :2;
+    unsigned int f3msk :2;
+    unsigned int f4msk :2;
+    unsigned int f5msk :2;
+    unsigned int f6msk :2;
+    unsigned int f7msk :2;
 };
 typedef struct canbus_cifmsksel1_bits_s canbus_cifmsksel1_bits_t;
 
 struct canbus_cifmsksel2_bits_s
 {
-    int f8msk :2;
-    int f9msk :2;
-    int f10msk :2;
-    int f11msk :2;
-    int f12msk :2;
-    int f13msk :2;
-    int f14msk :2;
-    int f15msk :2;
+    unsigned int f8msk :2;
+    unsigned int f9msk :2;
+    unsigned int f10msk :2;
+    unsigned int f11msk :2;
+    unsigned int f12msk :2;
+    unsigned int f13msk :2;
+    unsigned int f14msk :2;
+    unsigned int f15msk :2;
 };
 typedef struct canbus_cifmsksel2_bits_s canbus_cifmsksel2_bits_t;
 
 struct canbus_cirxful1_bits_s
 {
-    int rxful0 :1;
-    int rxful1 :1;
-    int rxful2 :1;
-    int rxful3 :1;
-    int rxful4 :1;
-    int rxful5 :1;
-    int rxful6 :1;
-    int rxful7 :1;
-    int rxful8 :1;
-    int rxful9 :1;
-    int rxful10 :1;
-    int rxful11 :1;
-    int rxful12 :1;
-    int rxful13 :1;
-    int rxful14 :1;
-    int rxful15 :1;
+    unsigned int rxful0 :1;
+    unsigned int rxful1 :1;
+    unsigned int rxful2 :1;
+    unsigned int rxful3 :1;
+    unsigned int rxful4 :1;
+    unsigned int rxful5 :1;
+    unsigned int rxful6 :1;
+    unsigned int rxful7 :1;
+    unsigned int rxful8 :1;
+    unsigned int rxful9 :1;
+    unsigned int rxful10 :1;
+    unsigned int rxful11 :1;
+    unsigned int rxful12 :1;
+    unsigned int rxful13 :1;
+    unsigned int rxful14 :1;
+    unsigned int rxful15 :1;
 };
 typedef struct canbus_cirxful1_bits_s canbus_cirxful1_bits_t;
 
 struct canbus_cirxful2_bits_s
 {
-    int rxful16 :1;
-    int rxful17 :1;
-    int rxful18 :1;
-    int rxful19 :1;
-    int rxful20 :1;
-    int rxful21 :1;
-    int rxful22 :1;
-    int rxful23 :1;
-    int rxful24 :1;
-    int rxful25 :1;
-    int rxful26 :1;
-    int rxful27 :1;
-    int rxful28 :1;
-    int rxful29 :1;
-    int rxful30 :1;
-    int rxful31 :1;
+    unsigned int rxful16 :1;
+    unsigned int rxful17 :1;
+    unsigned int rxful18 :1;
+    unsigned int rxful19 :1;
+    unsigned int rxful20 :1;
+    unsigned int rxful21 :1;
+    unsigned int rxful22 :1;
+    unsigned int rxful23 :1;
+    unsigned int rxful24 :1;
+    unsigned int rxful25 :1;
+    unsigned int rxful26 :1;
+    unsigned int rxful27 :1;
+    unsigned int rxful28 :1;
+    unsigned int rxful29 :1;
+    unsigned int rxful30 :1;
+    unsigned int rxful31 :1;
 };
 typedef struct canbus_cirxful2_bits_s canbus_cirxful2_bits_t;
 
 struct canbus_cirxovf1_bits_s
 {
-    int rxovf0 :1;
-    int rxovf1 :1;
-    int rxovf2 :1;
-    int rxovf3 :1;
-    int rxovf4 :1;
-    int rxovf5 :1;
-    int rxovf6 :1;
-    int rxovf7 :1;
-    int rxovf8 :1;
-    int rxovf9 :1;
-    int rxovf10 :1;
-    int rxovf11 :1;
-    int rxovf12 :1;
-    int rxovf13 :1;
-    int rxovf14 :1;
-    int rxovf15 :1;
+    unsigned int rxovf0 :1;
+    unsigned int rxovf1 :1;
+    unsigned int rxovf2 :1;
+    unsigned int rxovf3 :1;
+    unsigned int rxovf4 :1;
+    unsigned int rxovf5 :1;
+    unsigned int rxovf6 :1;
+    unsigned int rxovf7 :1;
+    unsigned int rxovf8 :1;
+    unsigned int rxovf9 :1;
+    unsigned int rxovf10 :1;
+    unsigned int rxovf11 :1;
+    unsigned int rxovf12 :1;
+    unsigned int rxovf13 :1;
+    unsigned int rxovf14 :1;
+    unsigned int rxovf15 :1;
 };
 typedef struct canbus_cirxovf1_bits_s canbus_cirxovf1_bits_t;
 
 struct canbus_cirxovf2_bits_s
 {
-    int rxovf16 :1;
-    int rxovf17 :1;
-    int rxovf18 :1;
-    int rxovf19 :1;
-    int rxovf20 :1;
-    int rxovf21 :1;
-    int rxovf22 :1;
-    int rxovf23 :1;
-    int rxovf24 :1;
-    int rxovf25 :1;
-    int rxovf26 :1;
-    int rxovf27 :1;
-    int rxovf28 :1;
-    int rxovf29 :1;
-    int rxovf30 :1;
-    int rxovf31 :1;
+    unsigned int rxovf16 :1;
+    unsigned int rxovf17 :1;
+    unsigned int rxovf18 :1;
+    unsigned int rxovf19 :1;
+    unsigned int rxovf20 :1;
+    unsigned int rxovf21 :1;
+    unsigned int rxovf22 :1;
+    unsigned int rxovf23 :1;
+    unsigned int rxovf24 :1;
+    unsigned int rxovf25 :1;
+    unsigned int rxovf26 :1;
+    unsigned int rxovf27 :1;
+    unsigned int rxovf28 :1;
+    unsigned int rxovf29 :1;
+    unsigned int rxovf30 :1;
+    unsigned int rxovf31 :1;
 };
 typedef struct canbus_cirxovf2_bits_s canbus_cirxovf2_bits_t;
 
 struct canbus_citrmncon_bits_s
 {
-    int txmpri :2;
-    int rtrenm :1;
-    int txreqm :1;
-    int txerrm :1;
-    int txlarbm :1;
-    int txabtm :1;
-    int txenm :1;
+    unsigned int txmpri :2;
+    unsigned int rtrenm :1;
+    unsigned int txreqm :1;
+    unsigned int txerrm :1;
+    unsigned int txlarbm :1;
+    unsigned int txabtm :1;
+    unsigned int txenm :1;
 
-    int txnpri :2;
-    int rtrenn :1;
-    int txreqn :1;
-    int txerrn :1;
-    int txlarbn :1;
-    int txabtn :1;
-    int txenn :1;;
+    unsigned int txnpri :2;
+    unsigned int rtrenn :1;
+    unsigned int txreqn :1;
+    unsigned int txerrn :1;
+    unsigned int txlarbn :1;
+    unsigned int txabtn :1;
+    unsigned int txenn :1;;
 };
 typedef struct canbus_citrmncon_bits_s canbus_citrmncon_bits_t;
 
 struct canbus_cibufpnt_bits_s
 {
-    int fabp :4;
-    int fbbp :4;
-    int fcbp :4;
-    int fdbp :4;
+    unsigned int fabp :4;
+    unsigned int fbbp :4;
+    unsigned int fcbp :4;
+    unsigned int fdbp :4;
 };
 typedef struct canbus_cibufpnt_bits_s canbus_cibufpnt_bits_t;
 
@@ -704,56 +702,53 @@ union canbus_cirxmnsid_bits_u
 {
     struct
     {
-        int eid16 :1;
-        int eid17 :1;
-        int :1;
-        int mide :1;
-        int :1;
-        int sid0 :1;
-        int sid1 :1;
-        int sid2 :1;
-        int sid3 :1;
-        int sid4 :1;
-        int sid5 :1;
-        int sid6 :1;
-        int sid7 :1;
-        int sid8 :1;
-        int sid9 :1;
-        int sid10 :1;
+        unsigned int eid16 :1;
+        unsigned int eid17 :1;
+        unsigned int :1;
+        unsigned int mide :1;
+        unsigned int :1;
+        unsigned int sid0 :1;
+        unsigned int sid1 :1;
+        unsigned int sid2 :1;
+        unsigned int sid3 :1;
+        unsigned int sid4 :1;
+        unsigned int sid5 :1;
+        unsigned int sid6 :1;
+        unsigned int sid7 :1;
+        unsigned int sid8 :1;
+        unsigned int sid9 :1;
+        unsigned int sid10 :1;
     };
     struct
     {
-        int eid_h :2;
-        int :3;
-        int sid :11;
+        unsigned int eid_h :2;
+        unsigned int :3;
+        unsigned int sid :11;
     };
 };
 typedef union canbus_cirxmnsid_bits_u canbus_cirxmnsid_bits_t;
 
 union canbus_cirxmneid_bits_u
 {
+    unsigned int eid_l;
     struct
     {
-        int eid0 :1;
-        int eid1 :1;
-        int eid2 :1;
-        int eid3 :1;
-        int eid4 :1;
-        int eid5 :1;
-        int eid6 :1;
-        int eid7 :1;
-        int eid8 :1;
-        int eid9 :1;
-        int eid10 :1;
-        int eid11 :1;
-        int eid12 :1;
-        int eid13 :1;
-        int eid14 :1;
-        int eid15 :1;
-    };
-    struct
-    {
-        int eid_l :16;
+        unsigned int eid0 :1;
+        unsigned int eid1 :1;
+        unsigned int eid2 :1;
+        unsigned int eid3 :1;
+        unsigned int eid4 :1;
+        unsigned int eid5 :1;
+        unsigned int eid6 :1;
+        unsigned int eid7 :1;
+        unsigned int eid8 :1;
+        unsigned int eid9 :1;
+        unsigned int eid10 :1;
+        unsigned int eid11 :1;
+        unsigned int eid12 :1;
+        unsigned int eid13 :1;
+        unsigned int eid14 :1;
+        unsigned int eid15 :1;
     };
 };
 typedef union canbus_cirxmneid_bits_u canbus_cirxmneid_bits_t;
@@ -762,56 +757,53 @@ union canbus_cirxfnsid_bits_u
 {
     struct
     {
-        int eid16 :1;
-        int eid17 :1;
-        int :1;
-        int exide :1;
-        int :1;
-        int sid0 :1;
-        int sid1 :1;
-        int sid2 :1;
-        int sid3 :1;
-        int sid4 :1;
-        int sid5 :1;
-        int sid6 :1;
-        int sid7 :1;
-        int sid8 :1;
-        int sid9 :1;
-        int sid10 :1;
+        unsigned int eid16 :1;
+        unsigned int eid17 :1;
+        unsigned int :1;
+        unsigned int exide :1;
+        unsigned int :1;
+        unsigned int sid0 :1;
+        unsigned int sid1 :1;
+        unsigned int sid2 :1;
+        unsigned int sid3 :1;
+        unsigned int sid4 :1;
+        unsigned int sid5 :1;
+        unsigned int sid6 :1;
+        unsigned int sid7 :1;
+        unsigned int sid8 :1;
+        unsigned int sid9 :1;
+        unsigned int sid10 :1;
     };
     struct
     {
-        int eid_h :2;
-        int :3;
-        int sid :11;
+        unsigned int eid_h :2;
+        unsigned int :3;
+        unsigned int sid :11;
     };
 };
 typedef union canbus_cirxfnsid_bits_u canbus_cirxfnsid_bits_t;
 
 union canbus_cirxfneid_bits_u
 {
+    unsigned int eid_l;
     struct
     {
-        int eid0 :1;
-        int eid1 :1;
-        int eid2 :1;
-        int eid3 :1;
-        int eid4 :1;
-        int eid5 :1;
-        int eid6 :1;
-        int eid7 :1;
-        int eid8 :1;
-        int eid9 :1;
-        int eid10 :1;
-        int eid11 :1;
-        int eid12 :1;
-        int eid13 :1;
-        int eid14 :1;
-        int eid15 :1;
-    };
-    struct
-    {
-        int eid_l :16;
+        unsigned int eid0 :1;
+        unsigned int eid1 :1;
+        unsigned int eid2 :1;
+        unsigned int eid3 :1;
+        unsigned int eid4 :1;
+        unsigned int eid5 :1;
+        unsigned int eid6 :1;
+        unsigned int eid7 :1;
+        unsigned int eid8 :1;
+        unsigned int eid9 :1;
+        unsigned int eid10 :1;
+        unsigned int eid11 :1;
+        unsigned int eid12 :1;
+        unsigned int eid13 :1;
+        unsigned int eid14 :1;
+        unsigned int eid15 :1;
     };
 };
 typedef union canbus_cirxfneid_bits_u canbus_cirxfneid_bits_t;
@@ -823,38 +815,38 @@ union canbus_buffer_exists_u
 
     struct
     {
-        int b0_exists :1;
-        int b1_exists :1;
-        int b2_exists :1;
-        int b3_exists :1;
-        int b4_exists :1;
-        int b5_exists :1;
-        int b6_exists :1;
-        int b7_exists :1;
-        int b8_exists :1;
-        int b9_exists :1;
-        int b10_exists :1;
-        int b11_exists :1;
-        int b12_exists :1;
-        int b13_exists :1;
-        int b14_exists :1;
-        int b15_exists :1;
-        int b16_exists :1;
-        int b17_exists :1;
-        int b18_exists :1;
-        int b19_exists :1;
-        int b20_exists :1;
-        int b21_exists :1;
-        int b22_exists :1;
-        int b23_exists :1;
-        int b24_exists :1;
-        int b25_exists :1;
-        int b26_exists :1;
-        int b27_exists :1;
-        int b28_exists :1;
-        int b29_exists :1;
-        int b30_exists :1;
-        int b31_exists :1;
+        unsigned int b0_exists :1;
+        unsigned int b1_exists :1;
+        unsigned int b2_exists :1;
+        unsigned int b3_exists :1;
+        unsigned int b4_exists :1;
+        unsigned int b5_exists :1;
+        unsigned int b6_exists :1;
+        unsigned int b7_exists :1;
+        unsigned int b8_exists :1;
+        unsigned int b9_exists :1;
+        unsigned int b10_exists :1;
+        unsigned int b11_exists :1;
+        unsigned int b12_exists :1;
+        unsigned int b13_exists :1;
+        unsigned int b14_exists :1;
+        unsigned int b15_exists :1;
+        unsigned int b16_exists :1;
+        unsigned int b17_exists :1;
+        unsigned int b18_exists :1;
+        unsigned int b19_exists :1;
+        unsigned int b20_exists :1;
+        unsigned int b21_exists :1;
+        unsigned int b22_exists :1;
+        unsigned int b23_exists :1;
+        unsigned int b24_exists :1;
+        unsigned int b25_exists :1;
+        unsigned int b26_exists :1;
+        unsigned int b27_exists :1;
+        unsigned int b28_exists :1;
+        unsigned int b29_exists :1;
+        unsigned int b30_exists :1;
+        unsigned int b31_exists :1;
     };
 };
 typedef union canbus_buffer_exists_u canbus_buffer_exists_t;
@@ -880,7 +872,7 @@ static int canbus_init(canbus_t *object,
                        unsigned int tx_dma_channel,
                        unsigned int rx_dma_channel,
                        volatile unsigned int dma_buffer[][8],
-                       unsigned int dma_buffer_length);
+                       unsigned int num_buffers);
 static int canbus_set_mode(canbus_t *object,
                            canbus_mode_t mode);
 static int canbus_notify_on(canbus_t *object,
@@ -963,14 +955,19 @@ static int canbus_init(canbus_t *object,
                        unsigned int tx_dma_channel,
                        unsigned int rx_dma_channel,
                        volatile unsigned int dma_buffer[][8],
-                       unsigned int dma_buffer_length)
+                       unsigned int num_buffers)
 {
     unsigned int i;
     dma_attr_t tx_dma_attr;
     dma_attr_t rx_dma_attr;
     unsigned int first_fifo_buffer;
     unsigned int last_fifo_buffer;
-    
+
+#ifdef DEBUG__
+    canbus_private_t *debug_private;
+    unsigned int debug_value = 0;
+#endif
+
     // Check for a valid canbus pointer and module number
     if( object == NULL \
         || object->module_number == 0 \
@@ -992,6 +989,10 @@ static int canbus_init(canbus_t *object,
     {// Allocation failed
         return CANBUS_E_ALLOC;
     }
+
+#ifdef DEBUG__
+    debug_private = (canbus_private_t *)(object->private);
+#endif
 
 #if (CANBUS_HW_NUMBER_OF_MODULES < 1) || (CANBUS_HW_NUMBER_OF_MODULES > 2)
 #error "CANBUS(__file__,__line__): CANBUS_HW_NUMBER_OF_MODULES is out of bounds. Expected a number \
@@ -1144,6 +1145,7 @@ from 1 to 2."
     {
         ((canbus_cictrl1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCTRL1)) \
             ->cancap = 1;
+        debug_value = ((canbus_private_t *)(object->private))->attr_.module.timestamp;
     }
 
     
@@ -1172,9 +1174,9 @@ from 1 to 2."
 
     // Set DMA buffer pointers and lengths
     *((volatile unsigned int **)(&((canbus_private_t *)(object->private))->tx_dma_->buffer_a)) = (volatile unsigned int *)dma_buffer;
-    *((unsigned int *)(&((canbus_private_t *)(object->private))->tx_dma_->buffer_a_size)) = dma_buffer_length;
+    *((unsigned int *)(&((canbus_private_t *)(object->private))->tx_dma_->buffer_a_size)) = num_buffers*8;
     *((volatile unsigned int **)(&((canbus_private_t *)(object->private))->rx_dma_->buffer_a)) = (volatile unsigned int *)dma_buffer;
-    *((unsigned int *)(&((canbus_private_t *)(object->private))->rx_dma_->buffer_a_size)) = dma_buffer_length;
+    *((unsigned int *)(&((canbus_private_t *)(object->private))->rx_dma_->buffer_a_size)) = num_buffers*8;
     
     
     // Set up DMA attributes
@@ -1183,6 +1185,12 @@ from 1 to 2."
         | DMA_CONFIG_ADDRMODE_PERIPHERAL_IND              \
         | DMA_CONFIG_NULLWRITE_DIS                        \
         | DMA_CONFIG_DIR_TO_PERIPHERAL                    \
+        | DMA_CONFIG_DATASIZE_WORD;
+    rx_dma_attr.config = DMA_CONFIG_OPMODE_CONTINUOUS \
+        | DMA_CONFIG_PINGPONG_DIS \
+        | DMA_CONFIG_ADDRMODE_PERIPHERAL_IND \
+        | DMA_CONFIG_NULLWRITE_DIS \
+        | DMA_CONFIG_DIR_FROM_PERIPHERAL \
         | DMA_CONFIG_DATASIZE_WORD;
     
     switch( object->module_number )
@@ -1241,150 +1249,150 @@ from 1 to 2."
     
     // Set start of FIFO buffer
     // Start calculation of last FIFO buffer by getting start buffer of FIFO
-    /** @todo Remove CANBUS_FIFO_START_Bx enum and use CANBUS_BUFFER_Bx enum instead */
+    /** @todo Remove CANBUS_BUFFER_Bx enum and use CANBUS_BUFFER_Bx enum instead */
     switch( ((canbus_private_t *)(object->private))->attr_.fifo.start )
     {
-    case CANBUS_FIFO_START_B0:
+    case CANBUS_BUFFER_B0:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b00000;
         first_fifo_buffer = 0;
         break;
-    case CANBUS_FIFO_START_B1:
+    case CANBUS_BUFFER_B1:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b00001;
         first_fifo_buffer = 1;
         break;
-    case CANBUS_FIFO_START_B2:
+    case CANBUS_BUFFER_B2:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b00010;
         first_fifo_buffer = 2;
         break;
-    case CANBUS_FIFO_START_B3:
+    case CANBUS_BUFFER_B3:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b00011;
         first_fifo_buffer = 3;
         break;
-    case CANBUS_FIFO_START_B4:
+    case CANBUS_BUFFER_B4:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b00100;
         first_fifo_buffer = 4;
         break;
-    case CANBUS_FIFO_START_B5:
+    case CANBUS_BUFFER_B5:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b00101;
         first_fifo_buffer = 5;
         break;
-    case CANBUS_FIFO_START_B6:
+    case CANBUS_BUFFER_B6:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b00110;
         first_fifo_buffer = 6;
         break;
-    case CANBUS_FIFO_START_B7:
+    case CANBUS_BUFFER_B7:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b00111;
         first_fifo_buffer = 7;
         break;
-    case CANBUS_FIFO_START_B8:
+    case CANBUS_BUFFER_B8:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b01000;
         first_fifo_buffer = 8;
         break;
-    case CANBUS_FIFO_START_B9:
+    case CANBUS_BUFFER_B9:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b01001;
         first_fifo_buffer = 9;
         break;
-    case CANBUS_FIFO_START_B10:
+    case CANBUS_BUFFER_B10:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b01010;
         first_fifo_buffer = 10;
         break;
-    case CANBUS_FIFO_START_B11:
+    case CANBUS_BUFFER_B11:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b01011;
         first_fifo_buffer = 11;
         break;
-        case CANBUS_FIFO_START_B12:
+    case CANBUS_BUFFER_B12:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b01100;
         first_fifo_buffer = 12;
         break;
-    case CANBUS_FIFO_START_B13:
+    case CANBUS_BUFFER_B13:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b01101;
         first_fifo_buffer = 13;
         break;
-    case CANBUS_FIFO_START_B14:
+    case CANBUS_BUFFER_B14:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b01110;
         first_fifo_buffer = 14;
         break;
-    case CANBUS_FIFO_START_B15:
+    case CANBUS_BUFFER_B15:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b01111;
         first_fifo_buffer = 15;
         break;
-    case CANBUS_FIFO_START_B16:
+    case CANBUS_BUFFER_B16:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b10000;
         first_fifo_buffer = 16;
         break;
-    case CANBUS_FIFO_START_B17:
+    case CANBUS_BUFFER_B17:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b10001;
         first_fifo_buffer = 17;
         break;
-    case CANBUS_FIFO_START_B18:
+    case CANBUS_BUFFER_B18:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b10010;
         first_fifo_buffer = 18;
         break;
-    case CANBUS_FIFO_START_B19:
+    case CANBUS_BUFFER_B19:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b10011;
         first_fifo_buffer = 19;
         break;
-    case CANBUS_FIFO_START_B20:
+    case CANBUS_BUFFER_B20:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b10100;
         first_fifo_buffer = 20;
         break;
-    case CANBUS_FIFO_START_B21:
+    case CANBUS_BUFFER_B21:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b10101;
         first_fifo_buffer = 21;
         break;
-    case CANBUS_FIFO_START_B22:
+    case CANBUS_BUFFER_B22:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b10110;
         first_fifo_buffer = 22;
         break;
-    case CANBUS_FIFO_START_B23:
+    case CANBUS_BUFFER_B23:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b10111;
         first_fifo_buffer = 23;
         break;
-    case CANBUS_FIFO_START_B24:
+    case CANBUS_BUFFER_B24:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b11000;
         first_fifo_buffer = 24;
         break;
-    case CANBUS_FIFO_START_B25:
+    case CANBUS_BUFFER_B25:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b11001;
         first_fifo_buffer = 25;
         break;
-    case CANBUS_FIFO_START_B26:
+    case CANBUS_BUFFER_B26:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b11010;
         first_fifo_buffer = 26;
         break;
-    case CANBUS_FIFO_START_B27:
+    case CANBUS_BUFFER_B27:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b11011;
         first_fifo_buffer = 27;
         break;
-    case CANBUS_FIFO_START_B28:
+    case CANBUS_BUFFER_B28:
         ((canbus_cifctrl_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFCTRL)) \
             ->fsa = 0b11100;
         first_fifo_buffer = 28;
@@ -1569,6 +1577,8 @@ from 1 to 2."
            ->opmode != CANBUS_OPMODE_DISABLE )
     {
     }
+
+    return CANBUS_E_NONE;
 }
     
 /**
@@ -1581,6 +1591,10 @@ from 1 to 2."
 static int canbus_set_mode(canbus_t *object,
                            canbus_mode_t mode)
 {
+#ifdef DEBUG__
+    canbus_private_t *debug_private = (canbus_private_t *)(object->private);
+#endif
+
     // Check for valid object
     if( !canbus.is_valid(object) )
     {// Invalid object
@@ -1684,6 +1698,10 @@ static int canbus_set_mask(canbus_t *object,
                            canbus_mask_t mask_num,
                            canbus_header_t *mask_value)
 {
+#ifdef DEBUG__
+    canbus_private_t *debug_private = (canbus_private_t *)(object->private);
+#endif
+
     // Check for a valid object
     if( !canbus.is_valid(object) )
     {// Object is invalid
@@ -1700,9 +1718,9 @@ static int canbus_set_mask(canbus_t *object,
         ((canbus_cirxmnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM0SID)) \
             ->mide = mask_value->ide;
         ((canbus_cirxmnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM0SID)) \
-            ->eid_h = mask_value->eid_h;
+            ->eid_h = ((mask_value->eid)&0x00030000)>>16;
         ((canbus_cirxmneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM0EID)) \
-            ->eid_l = mask_value->eid_l;
+            ->eid_l = (mask_value->eid)&0x0000FFFF;
     }
     if( mask_num == CANBUS_MASK_M1 || mask_num == CANBUS_MASK_ALL )
     {
@@ -1711,9 +1729,9 @@ static int canbus_set_mask(canbus_t *object,
         ((canbus_cirxmnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM1SID)) \
             ->mide = mask_value->ide;
         ((canbus_cirxmnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM1SID)) \
-            ->eid_h = mask_value->eid_h;
+            ->eid_h = ((mask_value->eid)&0x00030000)>>16;
         ((canbus_cirxmneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM1EID)) \
-            ->eid_l = mask_value->eid_l;
+            ->eid_l = (mask_value->eid)&0x0000FFFF;
     }
     if( mask_num == CANBUS_MASK_M2 || mask_num == CANBUS_MASK_ALL )
     {
@@ -1722,9 +1740,9 @@ static int canbus_set_mask(canbus_t *object,
         ((canbus_cirxmnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM2SID)) \
             ->mide = mask_value->ide;
         ((canbus_cirxmnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM2SID)) \
-            ->eid_h = mask_value->eid_h;
+            ->eid_h = ((mask_value->eid)&0x00030000)>>16;
         ((canbus_cirxmneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXM2EID)) \
-            ->eid_l = mask_value->eid_l;
+            ->eid_l = (mask_value->eid)&0x0000FFFF;
     }
 
     // Switch to buffer window
@@ -1744,6 +1762,10 @@ static int canbus_assign_mask(canbus_t *object,
                               canbus_mask_t mask_num,
                               canbus_filter_t filter_num)
 {
+#ifdef DEBUG__
+    canbus_private_t *debug_private = (canbus_private_t *)(object->private);
+#endif
+
     unsigned int assign_mask = 0;
     
     // Check for valid object
@@ -1942,6 +1964,10 @@ static int canbus_set_filter(canbus_t *object,
                              canbus_filter_t filter_num,
                              canbus_header_t *filter_value)
 {
+#ifdef DEBUG__
+    canbus_private_t *debug_private = (canbus_private_t *)(object->private);
+#endif
+
     // Check for valid object
     if( !canbus.is_valid(object) )
     {// Object is invalid
@@ -1965,9 +1991,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF0SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF0SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF0EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
     }
     else if( filter_num == CANBUS_FILTER_F1 )
     {// Set filter 1
@@ -1976,9 +2002,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF1SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF1SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF1EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
     }
     else if( filter_num == CANBUS_FILTER_F2 )
     {// Set filter 2
@@ -1987,9 +2013,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF2SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF2SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF2EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
     }
     else if( filter_num == CANBUS_FILTER_F3 )
     {// Set filter 3
@@ -1998,9 +2024,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF3SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF3SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF3EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
     }
     else if( filter_num == CANBUS_FILTER_F4 )
     {// Set filter 4
@@ -2009,9 +2035,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF4SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF4SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF4EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
     }
     else if( filter_num == CANBUS_FILTER_F5 )
     {// Set filter 5
@@ -2020,9 +2046,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF5SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF5SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF5EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
     }
     else if( filter_num == CANBUS_FILTER_F6 )
     {// Set filter 6
@@ -2031,9 +2057,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF6SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF6SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF6EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
     }
     else if( filter_num == CANBUS_FILTER_F7 )
     {// Set filter 7
@@ -2042,9 +2068,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF7SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF7SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF7EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
     }
     else if( filter_num == CANBUS_FILTER_F8 )
     {// Set filter 8
@@ -2053,9 +2079,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF8SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF8SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF8EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
     }
     else if( filter_num == CANBUS_FILTER_F9 )
     {// Set filter 9
@@ -2064,9 +2090,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF9SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF9SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF9EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
     }
     else if( filter_num == CANBUS_FILTER_F10 )
     {// Set filter 10
@@ -2075,9 +2101,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF10SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF10SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF10EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
     }
     else if( filter_num == CANBUS_FILTER_F11 )
     {// Set filter 11
@@ -2086,9 +2112,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF11SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF11SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF11EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
     }
     else if( filter_num == CANBUS_FILTER_F12 )
     {// Set filter 12
@@ -2097,9 +2123,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF12SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF12SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF12EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
     }
     else if( filter_num == CANBUS_FILTER_F13 )
     {// Set filter 13
@@ -2108,9 +2134,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF13SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF13SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF13EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
     }
     else if( filter_num == CANBUS_FILTER_F14 )
     {// Set filter 14
@@ -2119,9 +2145,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF14SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF14SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF14EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
     }
     else if( filter_num == CANBUS_FILTER_F15 )
     {// Set filter 15
@@ -2130,9 +2156,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF15SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF15SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF15EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
     }
     // Using an else if for this so that everytime we run the function we don't have to check every
     // possible value. Most of the time filter_num will be a single filter not ALL, so this portion
@@ -2145,9 +2171,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF0SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF0SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF0EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
 
         // Set filter 1
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF1SID)) \
@@ -2155,9 +2181,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF1SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF1SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF1EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
 
         // Set filter 2
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF2SID)) \
@@ -2165,9 +2191,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF2SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF2SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF2EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
 
         // Set filter 3
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF3SID)) \
@@ -2175,9 +2201,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF3SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF3SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF3EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
 
         // Set filter 4
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF4SID)) \
@@ -2185,9 +2211,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF4SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF4SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF4EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
 
         // Set filter 5
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF5SID)) \
@@ -2195,9 +2221,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF5SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF5SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF5EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
 
         // Set filter 6
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF6SID)) \
@@ -2205,9 +2231,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF6SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF6SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF6EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
 
         // Set filter 7
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF7SID)) \
@@ -2215,9 +2241,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF7SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF7SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF7EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
 
         // Set filter 8
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF8SID)) \
@@ -2225,9 +2251,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF8SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF8SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF8EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
 
         // Set filter 9
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF9SID)) \
@@ -2235,9 +2261,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF9SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF9SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF9EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
 
         // Set filter 10
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF10SID)) \
@@ -2245,9 +2271,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF10SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF10SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF10EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
 
         // Set filter 11
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF11SID)) \
@@ -2255,9 +2281,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF11SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF11SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF11EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
 
         // Set filter 12
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF12SID)) \
@@ -2265,9 +2291,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF12SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF12SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF12EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
 
         // Set filter 13
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF13SID)) \
@@ -2275,9 +2301,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF13SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF13SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF13EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
 
         // Set filter 14
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF14SID)) \
@@ -2285,9 +2311,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF14SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF14SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF14EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
 
         // Set filter 15
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF15SID)) \
@@ -2295,9 +2321,9 @@ static int canbus_set_filter(canbus_t *object,
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF15SID)) \
             ->exide = filter_value->ide;
         ((canbus_cirxfnsid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF15SID)) \
-            ->eid_h = filter_value->eid_h;
+            ->eid_h = ((filter_value->eid)&0x00030000)>>16;
         ((canbus_cirxfneid_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiRXF15EID)) \
-            ->eid_l = filter_value->eid_l;
+            ->eid_l = (filter_value->eid)&0x0000FFFF;
     }
     else
     {// Catch-all for invalid input
@@ -2330,6 +2356,10 @@ static int canbus_connect(canbus_t *object,
                           canbus_filter_t filter_num,
                           canbus_buffer_t buffer_num)
 {
+#ifdef DEBUG__
+    canbus_private_t *debug_private = (canbus_private_t *)(object->private);
+#endif
+
     unsigned int buffer_pointer = 0;
     
     // Check for valid object
@@ -2634,6 +2664,10 @@ static int canbus_connect(canbus_t *object,
 int canbus_disconnect(canbus_t *object,
                       canbus_filter_t filter_num)
 {
+#ifdef DEBUG__
+    canbus_private_t *debug_private = (canbus_private_t *)(object->private);
+#endif
+
     // Check for valid object
     if( !canbus.is_valid(object) )
     {// Object is invalid
@@ -2841,6 +2875,10 @@ static int canbus_write(canbus_t *object,
                         const canbus_message_t *message,
                         canbus_priority_t priority)
 {
+#ifdef DEBUG__
+    canbus_private_t *debug_private = (canbus_private_t *)(object->private);
+#endif
+
     unsigned int i=0;
     
     // Check for a valid object
@@ -2903,11 +2941,11 @@ static int canbus_write(canbus_t *object,
     
     // Write message buffer word 1
     *(((canbus_private_t *)(object->private))->tx_dma_->buffer_a + buffer_num*8 + 1) \
-        = (message->header.eid_h<<10) + (message->header.eid_l>>6);
+        = (message->header.eid>>6);
 
     // Write message buffer word 2
     *(((canbus_private_t *)(object->private))->tx_dma_->buffer_a + buffer_num*8 + 2) \
-        = ((message->header.eid_l&0x003F)<<10) + message->dlc;
+        = (((message->header.eid)&0x0000003F)<<10) + message->dlc;
 
     // Write message buffer words 3-6
     for(i=0; i<4; ++i)
@@ -3007,6 +3045,10 @@ static int canbus_write(canbus_t *object,
 static int canbus_abort_write(canbus_t *object,
                               canbus_buffer_t buffer_num)
 {
+#ifdef DEBUG__
+    canbus_private_t *debug_private = (canbus_private_t *)(object->private);
+#endif
+
     // Check for valid object
     if( !canbus.is_valid(object) )
     {// Invalid object
@@ -3164,6 +3206,10 @@ static int canbus_read(canbus_t *object,
                        canbus_buffer_t buffer_num,
                        canbus_message_t *message)
 {
+#ifdef DEBUG__
+    canbus_private_t *debug_private = (canbus_private_t *)(object->private);
+#endif
+
     int return_value = 0;
 
     return_value = canbus.peek(object, buffer_num, message);
@@ -3232,6 +3278,10 @@ static int canbus_peek(canbus_t *object,
                        canbus_buffer_t buffer_num,
                        canbus_message_t *message)
 {
+#ifdef DEBUG__
+    canbus_private_t *debug_private = (canbus_private_t *)(object->private);
+#endif
+
     unsigned int i;
     volatile unsigned int *buffer_ptr = NULL;
     
@@ -3342,6 +3392,10 @@ static int canbus_peek(canbus_t *object,
 static bool canbus_is_empty(canbus_t *object,
                             canbus_buffer_t buffer_num)
 {
+#ifdef DEBUG__
+    canbus_private_t *debug_private = (canbus_private_t *)(object->private);
+#endif
+
     // Check for valid object
     if( !canbus.is_valid(object) )
     {// Invalid object
@@ -3474,6 +3528,10 @@ static bool canbus_is_empty(canbus_t *object,
 static bool canbus_buffer_exists(canbus_t *object,
                                      canbus_buffer_t buffer_num)
 {
+#ifdef DEBUG__
+    canbus_private_t *debug_private = (canbus_private_t *)(object->private);
+#endif
+
     // Check for a valid object
     if( !canbus.is_valid(object) )
     {// Invalid object
@@ -3594,6 +3652,10 @@ static bool canbus_buffer_exists(canbus_t *object,
  */
 static bool canbus_is_valid(canbus_t *object)
 {
+#ifdef DEBUG__
+    canbus_private_t *debug_private = (canbus_private_t *)(object->private);
+#endif
+
     return ( object != NULL                                          \
              && object->module_number > 0                            \
              && object->module_number <= CANBUS_HW_NUMBER_OF_MODULES \
@@ -3610,6 +3672,10 @@ static bool canbus_is_valid(canbus_t *object)
 int canbus_get_direction(canbus_t *object,
                          canbus_buffer_t buffer_num)
 {
+#ifdef DEBUG__
+    canbus_private_t *debug_private = (canbus_private_t *)(object->private);
+#endif
+
     // Check for valid object
     if( !canbus.is_valid(object) )
     {// Invalid object
@@ -3676,6 +3742,10 @@ int canbus_get_direction(canbus_t *object,
  */
 static void canbus_clean_up(canbus_t *object)
 {
+#ifdef DEBUG__
+    canbus_private_t *debug_private = (canbus_private_t *)(object->private);
+#endif
+    
     // Check for valid object pointer
     if( object != NULL )
     {// Valid object pointer
@@ -3812,1027 +3882,3 @@ static void canbus_clean_up(canbus_t *object)
 static void canbus_isr(canbus_t *object)
 {
 }
-
-
-
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-
-
-
-
-/*
-int can_init(can_module_t *module)
-{
-    //! @TODO Allow for partial init (only RX or only TX).
-    //! @TODO Move PPS settings to kernel.
-
-    // Set up PPS
-    PPSUnLock;
-    PPSOutput(PPS_C1TX,PPS_RP9);
-    PPSInput(PPS_C1RX,PPS_RP8);
-    PPSLock;
-
-    // Check for valid can_base_address
-    if( module->can_base_address == NULL )
-    {
-        return -1;
-    }
-
-    // Check for valid tx_dma_base_address
-    if( module->tx_dma_base_address == NULL )
-    {
-        return -1;
-    }
-
-    // Check for valid rx_dma_base_address
-    if( module->rx_dma_base_address == NULL )
-    {
-        return -1;
-    }
-
-    // Check for valid can_buffer
-    if( module->can_buffer == NULL )
-    {
-        return -1;
-    }
-    
-    // Switch to configuration mode
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiCTRL1_OFFSET) = (*(module->can_base_address + CANBUS_SFR_OFFSET_CiCTRL1_OFFSET) & 0xF8FF) | (CAN_MODE_CONFIG<<8);
-    while( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiCTRL1_OFFSET) & 0x00E0) != (CAN_MODE_CONFIG)<<5 );
-    module->open_mode = CAN_MODE_CONFIG;
-    
-    // Set up bit timing
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiCFG1_OFFSET) = (module->bit_timing&(SYNC_JUMP_MASK | BAUD_PRE_MASK));
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiCFG2_OFFSET) = ((module->bit_timing&ENABLE_WAKE)>>5) | (module->bit_timing&PHASE_SEG2_MASK)>>6 | ((module->bit_timing&ENABLE_PHASE_SEG2_PROG)>>10) | ((module->bit_timing&TRIPLE_SAMPLE)>>12) | (module->bit_timing&(PHASE_SEG1_MASK | PROP_SEG_MASK))>>8;
-    
-    // Switch to filter window
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiCTRL1_OFFSET) |= 0x0001;
-    
-    // Disable all filters by default
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiFEN1_OFFSET) = 0x0000;
-    
-    // Set up filter buffer pointers
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiBUFPNT1_OFFSET) = 0xFFFF;
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiBUFPNT2_OFFSET) = 0xFFFF;
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiBUFPNT3_OFFSET) = 0xFFFF;
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiBUFPNT4_OFFSET) = 0xFFFF;
-    
-    // Switch to buffer window
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiCTRL1_OFFSET) &= 0xFFFE;
-    
-    // Set up TX buffers
-    // TR0: Highest Priority
-    // TR1: Highest Priority
-    // TR2: High Priority
-    // TR3: High Priority
-    // TR4: Low Priority
-    // TR5: Low Priority
-    // TR6: Lowest Priority
-    // TR7: Lowest Priority
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiTR01CON_OFFSET) = (1<<15) | (0b11<<8) | (1<<7) | (0b11);
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiTR23CON_OFFSET) = (1<<15) | (0b10<<8) | (1<<7) | (0b10);
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiTR45CON_OFFSET) = (1<<15) | (0b01<<8) | (1<<7) | (0b01);
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiTR67CON_OFFSET) = (1<<15) | (0b00<<8) | (1<<7) | (0b00);
-    
-    // Set up RX FIFO buffer
-    // Start buffer: 8
-    // Number of buffers: 24
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiFCTRL_OFFSET) = (0xA008);
-    
-    // Set up CAN interrupts
-    //! @TODO Write error handling functions.
-    //*(module->can_base_address + CANBUS_SFR_OFFSET_CiINTE_OFFSET) |= (0x0003);
-    
-    //! @TODO Change CAN mode to disable
-    
-    // Set up DMA channel for TX
-    *(module->tx_dma_base_address + DMAxCON_OFFSET) = 0x2020;
-    *(module->tx_dma_base_address + DMAxREQ_OFFSET) = 0x0046;
-    *(module->tx_dma_base_address + DMAxSTA_OFFSET) = (unsigned int)module->can_buffer - (unsigned int)&_DMA_BASE;
-    *(module->tx_dma_base_address + DMAxPAD_OFFSET) = (volatile unsigned int)(module->can_base_address + CANBUS_SFR_OFFSET_CiTXD_OFFSET);
-    *(module->tx_dma_base_address + DMAxCNT_OFFSET) = 0x0007;
-    
-    // Set up DMA channel for RX
-    *(module->rx_dma_base_address + DMAxCON_OFFSET) = 0x0020;
-    *(module->rx_dma_base_address + DMAxREQ_OFFSET) = 0x0022;
-    *(module->rx_dma_base_address + DMAxSTA_OFFSET) = (unsigned int)module->can_buffer - (unsigned int)&_DMA_BASE;
-    *(module->rx_dma_base_address + DMAxPAD_OFFSET) = (volatile unsigned int)(module->can_base_address + CANBUS_SFR_OFFSET_CiRXD_OFFSET);
-    *(module->rx_dma_base_address + DMAxCNT_OFFSET) = 0x0007;
-
-    return 0;
-}
-
-
-
-int can_open(can_module_t *module, unsigned int mode)
-{
-    //! @TODO Move open_mode below setting the CAN mode
-    // Set open_mode
-    module->open_mode = mode;
-    
-    // Enable TX DMA channel
-    if( (module->open_mode & WRITE) == WRITE )
-    {
-        *(module->tx_dma_base_address + DMAxCON_OFFSET) |= 0x8000;
-    }
-    
-    // Enable RX DMA channel
-    if( (module->open_mode & READ) == READ )
-    {
-        *(module->rx_dma_base_address + DMAxCON_OFFSET) |= 0x8000;
-    }
-
-    // Set default mask
-    if( module->set_mask(module, 0, carlcomm_mask) == -1 )
-    {// Setting default mask failed
-        return -1;
-    }
-
-    // Set default filter
-    if( module->set_filter(module, 0, carlcomm_filter, 0) == -1 )
-    {// Setting default filter failed
-        return -1;
-    }
-
-    // Enable default filter
-    if( module->enable_filter(module, 0) == -1 )
-    {// Enabling default filter failed
-        return -1;
-    }
-    
-    // Set CAN mode
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiCTRL1_OFFSET) = (*(module->can_base_address + CANBUS_SFR_OFFSET_CiCTRL1_OFFSET) & 0xF8FF) | ((module->open_mode & 0x0007)<<8);
-    while( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiCTRL1_OFFSET) & 0x00E0) != (module->open_mode & 0x0007)<<5 );
-
-    return 0;
-}
-
-int can_write(can_module_t *module, const carlmessage_t *message)
-{
-    volatile unsigned int *write_ptr;
-    unsigned int write_buffer_num;
-    
-    if( module == NULL)
-    {
-        return -1;
-    }
-
-    if( message == NULL )
-    {
-        return module->tx_ready;
-    }
-
-    if( (module->open_mode&WRITE) != WRITE )
-    {
-        return -1;
-    }
-
-    // If buffer is full, flush and continue
-    if( module->tx_ready == (0xFF>>(8-CAN_TX_BUFFER_LENGTH)) )
-    {
-        if( module->flush_tx(module) == -1 )
-        {
-            return -1;
-        }
-    }
-
-    // Find next empty, unlocked buffer that is not currently being sent
-    if( !(module->tx_ready&0x01) && !(module->tx_locks&0x01) && !(*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR01CON_OFFSET)&0x0008) )
-    {// Buffer TR0 is empty and unlocked
-        // Get lock
-        module->tx_locks |= 0x01;
-
-        // Set write_ptr
-        write_ptr = module->can_buffer;
-
-        // Store write_buffer_num for later
-        write_buffer_num = 0;
-    }
-    else if( !(module->tx_ready&0x02) && !(module->tx_locks&0x02) && !(*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR01CON_OFFSET)&0x0800) )
-    {// Buffer TR1 is empty and unlocked
-        // Get lock
-        module->tx_locks |= 0x02;
-
-        // Set write_ptr
-        write_ptr = module->can_buffer + 8;
-
-        // Store write_buffer_num for later
-        write_buffer_num = 1;
-    }
-    else if( !(module->tx_ready&0x04) && !(module->tx_locks&0x04) && !(*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR23CON_OFFSET)&0x0008) )
-    {// Buffer TR2 is empty and unlocked
-        // Get lock
-        module->tx_locks |= 0x04;
-
-        // Set write_ptr
-        write_ptr = module->can_buffer + 16;
-
-        // Store write_buffer_num for later
-        write_buffer_num = 2;
-    }
-    else if( !(module->tx_ready&0x08) && !(module->tx_locks&0x08) && !(*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR23CON_OFFSET)&0x0800) )
-    {// Buffer TR3 is empty and unlocked
-        // Get lock
-        module->tx_locks |= 0x08;
-
-        // Set write_ptr
-        write_ptr = module->can_buffer + 24;
-
-        // Store write_buffer_num for later
-        write_buffer_num = 3;
-    }
-    else if( !(module->tx_ready&0x10) && !(module->tx_locks&0x10) && !(*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR45CON_OFFSET)&0x0008) )
-    {// Buffer TR4 is empty and unlocked
-        // Get lock
-        module->tx_locks |= 0x10;
-
-        // Set write_ptr
-        write_ptr = module->can_buffer + 32;
-
-        // Store write_buffer_num for later
-        write_buffer_num = 4;
-    }
-    else if( !(module->tx_ready&0x20) && !(module->tx_locks&0x20) && !(*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR45CON_OFFSET)&0x0800) )
-    {// Buffer TR5 is empty and unlocked
-        // Get lock
-        module->tx_locks |= 0x10;
-
-        // Set write_ptr
-        write_ptr = module->can_buffer + 40;
-
-        // Store write_buffer_num for later
-        write_buffer_num = 5;
-    }
-    else if( !(module->tx_ready&0x40) && !(module->tx_locks&0x40) && !(*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR67CON_OFFSET)&0x0008) )
-    {// Buffer TR6 is empty and unlocked
-        // Get lock
-        module->tx_locks |= 0x10;
-
-        // Set write_ptr
-        write_ptr = module->can_buffer + 48;
-
-        // Store write_buffer_num for later
-        write_buffer_num = 6;
-    }
-    else if( !(module->tx_ready&0x80) && !(module->tx_locks&0x80) && !(*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR67CON_OFFSET)&0x0800) )
-    {// Buffer TR7 is empty and unlocked
-        // Get lock
-        module->tx_locks |= 0x10;
-
-        // Set write_ptr
-        write_ptr = module->can_buffer + 56;
-
-        // Store write_buffer_num for later
-        write_buffer_num = 7;
-    }
-    else
-    {// No buffers available to write
-        return -1;
-    }
-    
-        
-    // Write carlmessage to buffer
-
-    // Always an extended id (ide = 1)
-    *write_ptr = (message->header.id.standard_id<<2) | (1<<1) | (1);
-    *(write_ptr+1) = (message->header.id.extended_id>>6);
-    *(write_ptr+2) = (message->header.id.extended_id<<10) | (message->dlc);
-    if( message->rtr )
-    {// Set RTR flag
-        *(write_ptr+2) |= (1<<9);
-    }
-    else
-    {// Clear RTR flag
-        *(write_ptr+2) &= ~(1<<9);
-    }
-
-    // Copy data to buffer
-    *(write_ptr+3) = (message->data[1]<<8) | (message->data[0]);
-    *(write_ptr+4) = (message->data[3]<<8) | (message->data[2]);
-    *(write_ptr+5) = (message->data[5]<<8) | (message->data[4]);
-    *(write_ptr+6) = (message->data[7]<<8) | (message->data[6]);
-
-    // Set tx_ready bit
-    module->tx_ready |= 1<<(write_buffer_num);
-
-    // Release buffer lock
-    module->tx_locks &= ~(1<<(write_buffer_num));
-
-    return write_buffer_num;
-}
-
-
-int can_read(can_module_t *module, carlmessage_t *message)
-{
-    unsigned int read_buffer_num;
-    volatile unsigned int *read_ptr = NULL;
-
-    // Check for valid module pointer
-    if( module == NULL )
-    {
-        return -1;
-    }
-
-    // Check for valid message pointer
-    if( message == NULL )
-    {
-        //! @TODO Return number of messages in buffer
-        return 0;
-    }
-
-    // Check for correct open_mode
-    if( ((module->open_mode&READ) != READ) || ((module->open_mode&0x0007) == CAN_MODE_DISABLE) || ((module->open_mode&0x0007) == CAN_MODE_CONFIG) )
-    {
-        return -1;
-    }
-
-    // Check for available rx_lock
-    if( module->rx_lock )
-    {
-        return -1;
-    }
-
-    // Get rx_lock
-    module->rx_lock = true;
-
-    // Check for message in next read buffer
-    read_buffer_num = (*(module->can_base_address + CANBUS_SFR_OFFSET_CiFIFO_OFFSET)&0x003F);
-    if( read_buffer_num < 16 )
-    {// Use CANBUS_SFR_OFFSET_CiRXFUL1
-        if( *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXFUL1_OFFSET)&(1<<read_buffer_num) )
-        {// A new message exists
-            // Set read_ptr to start of can buffer + read_buffer_num*8
-            read_ptr = module->can_buffer + read_buffer_num*8;
-        }
-    }
-    else if( read_buffer_num < 32 )
-    {// Use CANBUS_SFR_OFFSET_CiRXFUL2
-        if( *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXFUL2_OFFSET)&(1<<(read_buffer_num-16)) )
-        {// A new message exists
-            // Set read_ptr to start of can buffer + read_buffer_num*8
-            read_ptr = module->can_buffer + read_buffer_num*8;
-        }
-    }
-    else
-    {// Unknown value of read_buffer_num!
-        // Release lock and return error
-        module->rx_lock = false;
-        return -1;
-    }
-
-    // If read_ptr is not NULL a new message exists
-    if( read_ptr != NULL )
-    {// A new message exists and read_ptr points to it
-
-        // Zero message header (since some garbage bits remain)
-        message->header.uint32 = 0x00000000;
-        
-        // Copy buffer into message
-        
-        // Should always be an extended id
-        message->header.id.standard_id = (*read_ptr)>>2;
-        message->header.id.extended_id = (*(read_ptr+1))<<6 | (*(read_ptr+2))>>10;
-        if( (*(read_ptr+2))&0x0200 )
-        {// Set rtr flag
-            message->rtr = true;
-        }
-        else
-        {// Clear rtr flag
-            message->rtr = false;
-        }
-        
-        message->dlc = (*(read_ptr+2))&0x000F;
-        message->data[0] = (*(read_ptr+3))&0x00FF;
-        message->data[1] = ((*(read_ptr+3))&0xFF00)>>8;
-        message->data[2] = (*(read_ptr+4))&0x00FF;
-        message->data[3] = ((*(read_ptr+4))&0xFF00)>>8;
-        message->data[4] = (*(read_ptr+5))&0x00FF;
-        message->data[5] = ((*(read_ptr+5))&0xFF00)>>8;
-        message->data[6] = (*(read_ptr+6))&0x00FF;
-        message->data[7] = ((*(read_ptr+6))&0xFF00)>>8;
-
-        if( read_buffer_num < 16 )
-        {// Use CANBUS_SFR_OFFSET_CiRXFUL1
-            // Clear RXFUL bit
-            *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXFUL1_OFFSET) &= ~(1<<read_buffer_num);
-        }
-        else if( read_buffer_num < 32 )
-        {// Use CANBUS_SFR_OFFSET_CiRXFUL2
-            // Clear RXFUL bit
-            *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXFUL2_OFFSET) &= ~(1<<(read_buffer_num-16));
-        }
-        else
-        {// Shouldn't ever happen!
-            module->rx_lock = false;
-            return -1;
-        }
-        
-        // Release lock
-        module->rx_lock = false;
-
-        // Return the filter number that accepted the message
-        return *(read_ptr+7)>>8;
-    }
-    else
-    {// No new messages received
-
-        // Release rx_lock
-        module->rx_lock = false;
-        
-        // No messages received, so return a value not corresponding to a filter number
-        return 32;
-    }
-}
-
-int can_close(can_module_t *module)
-{
-    int return_val = 0;
-    // Flush all remaining messages
-    if( module->flush_tx(module) == -1 )
-    {
-        return_val = -1;
-    }
-    
-    // Set open_mode to CAN_MODE_DISABLE | !READ | !WRITE
-    module->open_mode &= ~(READ | WRITE | 0x0007);
-    module->open_mode |= CAN_MODE_DISABLE;
-    
-    // Disable TX DMA channel
-    *(module->tx_dma_base_address + DMAxCON_OFFSET) &= 0x7FFF;
-    
-    // Disable RX DMA channel
-    *(module->rx_dma_base_address + DMAxCON_OFFSET) &= 0x7FFF;
-    
-    // Set CAN mode
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiCTRL1_OFFSET) = (*(module->can_base_address + CANBUS_SFR_OFFSET_CiCTRL1_OFFSET) & 0xF8FF) | ((module->open_mode & 0x0007)<<8);
-    while( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiCTRL1_OFFSET) & 0x00E0) != (module->open_mode & 0x0007)<<5 );
-
-    return return_val;
-}
-
-int can_flush_tx(can_module_t *module)
-{
-    //! @TODO Add errno type error reporting scheme.
-    int return_value = 0;
-    
-    // Check for valid module
-    if( module == NULL )
-    {
-        return -1;
-    }
-
-#if (CAN_TX_BUFFER_LENGTH > 0)
-    // Check status of TR0
-    if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR01CON_OFFSET)&0x0008) )
-    {// TXREQ bit set
-        // Check for abort
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR01CON_OFFSET)&0x0040) )
-        {// Message was aborted
-            return_value = -1;
-        }
-        // Check for lost arbitration
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR01CON_OFFSET)&0x0020) )
-        {// Message lost arbitration
-            // Resend message?
-            return_value = -1;
-        }
-        // Check for bus error
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR01CON_OFFSET)&0x0010) )
-        {// Bus error occurred while sending message
-            // Resend message?
-            return_value = -1;
-        }
-    }
-    else
-    {// TXREQ bit is clear
-        // Check for a message that is ready to send and not locked
-        if( (module->tx_ready&0x01) && !(module->tx_locks&0x01) )
-        {// Ready to send and not locked
-            // Set TXREQ bit
-            *(module->can_base_address + CANBUS_SFR_OFFSET_CiTR01CON_OFFSET) |= 0x0008;
-
-            // Clear tx_ready
-            module->tx_ready &= ~(0x01);
-        }
-    }
-#endif
-    
-#if (CAN_TX_BUFFER_LENGTH > 1)
-    // Check status of TR1
-    if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR01CON_OFFSET)&0x0800) )
-    {// TXREQ bit set
-        // Check for abort
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR01CON_OFFSET)&0x4000) )
-        {// Message was aborted
-            return_value = -1;
-        }
-        // Check for lost arbitration
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR01CON_OFFSET)&0x2000) )
-        {// Message lost arbitration
-            // Resend message?
-            return_value = -1;
-        }
-        // Check for bus error
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR01CON_OFFSET)&0x1000) )
-        {// Bus error occurred while sending message
-            // Resend message?
-            return_value = -1;
-        }
-    }
-    else
-    {// TXREQ bit is clear
-        // Check for a message that is ready to send and not locked
-        if( (module->tx_ready&0x02) && !(module->tx_locks&0x02) )
-        {// Ready to send and not locked
-            // Set TXREQ bit
-            *(module->can_base_address + CANBUS_SFR_OFFSET_CiTR01CON_OFFSET) |= 0x0800;
-
-            // Clear tx_ready
-            module->tx_ready &= ~(0x02);
-        }
-    }
-#endif
-
-#if (CAN_TX_BUFFER_LENGTH > 2)
-    // Check status of TR2
-    if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR23CON_OFFSET)&0x0008) )
-    {// TXREQ bit set
-        // Check for abort
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR23CON_OFFSET)&0x0040) )
-        {// Message was aborted
-            return_value = -1;
-        }
-        // Check for lost arbitration
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR23CON_OFFSET)&0x0020) )
-        {// Message lost arbitration
-            // Resend message?
-            return_value = -1;
-        }
-        // Check for bus error
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR23CON_OFFSET)&0x0010) )
-        {// Bus error occurred while sending message
-            // Resend message?
-            return_value = -1;
-        }
-    }
-    else
-    {// TXREQ bit is clear
-        // Check for a message that is ready to send and not locked
-        if( (module->tx_ready&0x04) && !(module->tx_locks&0x04) )
-        {// Ready to send and not locked
-            // Set TXREQ bit
-            *(module->can_base_address + CANBUS_SFR_OFFSET_CiTR23CON_OFFSET) |= 0x0008;
-
-            // Clear tx_ready
-            module->tx_ready &= ~(0x04);
-        }
-    }
-#endif
-
-#if (CAN_TX_BUFFER_LENGTH > 3)
-    // Check status of TR3
-    if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR23CON_OFFSET)&0x0800) )
-    {// TXREQ bit set
-        // Check for abort
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR23CON_OFFSET)&0x4000) )
-        {// Message was aborted
-            return_value = -1;
-        }
-        // Check for lost arbitration
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR23CON_OFFSET)&0x2000) )
-        {// Message lost arbitration
-            // Resend message?
-            return_value = -1;
-        }
-        // Check for bus error
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR23CON_OFFSET)&0x1000) )
-        {// Bus error occurred while sending message
-            // Resend message?
-            return_value = -1;
-        }
-    }
-    else
-    {// TXREQ bit is clear
-        // Check for a message that is ready to send and not locked
-        if( (module->tx_ready&0x08) && !(module->tx_locks&0x08) )
-        {// Ready to send and not locked
-            // Set TXREQ bit
-            *(module->can_base_address + CANBUS_SFR_OFFSET_CiTR23CON_OFFSET) |= 0x0800;
-
-            // Clear tx_ready
-            module->tx_ready &= ~(0x08);
-        }
-    }
-#endif
-
-#if (CAN_TX_BUFFER_LENGTH > 4)
-    // Check status of TR4
-    if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR45CON_OFFSET)&0x0008) )
-    {// TXREQ bit set
-        // Check for abort
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR45CON_OFFSET)&0x0040) )
-        {// Message was aborted
-            return_value = -1;
-        }
-        // Check for lost arbitration
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR45CON_OFFSET)&0x0020) )
-        {// Message lost arbitration
-            // Resend message?
-            return_value = -1;
-        }
-        // Check for bus error
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR45CON_OFFSET)&0x0010) )
-        {// Bus error occurred while sending message
-            // Resend message?
-            return_value = -1;
-        }
-    }
-    else
-    {// TXREQ bit is clear
-        // Check for a message that is ready to send and not locked
-        if( (module->tx_ready&0x10) && !(module->tx_locks&0x10) )
-        {// Ready to send and not locked
-            // Set TXREQ bit
-            *(module->can_base_address + CANBUS_SFR_OFFSET_CiTR45CON_OFFSET) |= 0x0008;
-
-            // Clear tx_ready
-            module->tx_ready &= ~(0x10);
-        }
-    }
-#endif
-    
-#if (CAN_TX_BUFFER_LENGTH > 5)
-    // Check status of TR5
-    if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR45CON_OFFSET)&0x0800) )
-    {// TXREQ bit set
-        // Check for abort
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR45CON_OFFSET)&0x4000) )
-        {// Message was aborted
-            return_value = -1;
-        }
-        // Check for lost arbitration
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR45CON_OFFSET)&0x2000) )
-        {// Message lost arbitration
-            // Resend message?
-            return_value = -1;
-        }
-        // Check for bus error
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR45CON_OFFSET)&0x1000) )
-        {// Bus error occurred while sending message
-            // Resend message?
-            return_value = -1;
-        }
-    }
-    else
-    {// TXREQ bit is clear
-        // Check for a message that is ready to send and not locked
-        if( (module->tx_ready&0x20) && !(module->tx_locks&0x20) )
-        {// Ready to send and not locked
-            // Set TXREQ bit
-            *(module->can_base_address + CANBUS_SFR_OFFSET_CiTR45CON_OFFSET) |= 0x0800;
-
-            // Clear tx_ready
-            module->tx_ready &= ~(0x20);
-        }
-    }
-#endif
-
-#if (CAN_TX_BUFFER_LENGTH > 6)
-    // Check status of TR6
-    if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR67CON_OFFSET)&0x0008) )
-    {// TXREQ bit set
-        // Check for abort
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR67CON_OFFSET)&0x0040) )
-        {// Message was aborted
-            return_value = -1;
-        }
-        // Check for lost arbitration
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR67CON_OFFSET)&0x0020) )
-        {// Message lost arbitration
-            // Resend message?
-            return_value = -1;
-        }
-        // Check for bus error
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR67CON_OFFSET)&0x0010) )
-        {// Bus error occurred while sending message
-            // Resend message?
-            return_value = -1;
-        }
-    }
-    else
-    {// TXREQ bit is clear
-        // Check for a message that is ready to send and not locked
-        if( (module->tx_ready&0x40) && !(module->tx_locks&0x40) )
-        {// Ready to send and not locked
-            // Set TXREQ bit
-            *(module->can_base_address + CANBUS_SFR_OFFSET_CiTR67CON_OFFSET) |= 0x0008;
-
-            // Clear tx_ready
-            module->tx_ready &= ~(0x40);
-        }
-    }
-#endif
-
-#if (CAN_TX_BUFFER_LENGTH > 7)
-    // Check status of TR7
-    if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR67CON_OFFSET)&0x0800) )
-    {// TXREQ bit set
-        // Check for abort
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR67CON_OFFSET)&0x4000) )
-        {// Message was aborted
-            return_value = -1;
-        }
-        // Check for lost arbitration
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR67CON_OFFSET)&0x2000) )
-        {// Message lost arbitration
-            // Resend message?
-            return_value = -1;
-        }
-        // Check for bus error
-        if( (*(module->can_base_address + CANBUS_SFR_OFFSET_CiTR67CON_OFFSET)&0x1000) )
-        {// Bus error occurred while sending message
-            // Resend message?
-            return_value = -1;
-        }
-    }
-    else
-    {// TXREQ bit is clear
-        // Check for a message that is ready to send and not locked
-        if( (module->tx_ready&0x80) && !(module->tx_locks&0x80) )
-        {// Ready to send and not locked
-            // Set TXREQ bit
-            *(module->can_base_address + CANBUS_SFR_OFFSET_CiTR67CON_OFFSET) |= 0x0800;
-
-            // Clear tx_ready
-            module->tx_ready &= ~(0x80);
-        }
-    }
-#endif
-
-    return return_value;
-}
-
-int can_flush_rx(can_module_t *module)
-{
-    // The hardware FIFO takes care of the RX buffer
-    
-    return 0;
-}
-
-int can_set_bit_timing(can_module_t *module, uint32_t bit_timing)
-{
-    if( module == NULL )
-    {
-        return -1;
-    }
-
-    module->bit_timing = bit_timing;
-    
-    return 0;
-}
-
-int can_set_mask(can_module_t *module, unsigned int mask_num, carlmessage_header_t mask_val)
-{
-    // Check for valid module
-    if( module == NULL )
-    {
-        return -1;
-    }
-
-    // Only modify masks if module is not readable or writable
-    //! @TODO Add module lock so the mask modification is atomic.
-    if( module->open_mode&READ == READ || module->open_mode&WRITE == WRITE )
-    {
-        return -1;
-    }
-
-    // Check for valid mask number
-    if( mask_num > 2 )
-    {
-        return -1;
-    }
-
-    //! The module should normally be in buffer window
-    // Set filter window
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiCTRL1_OFFSET) |= 0x0001;
-
-    switch(mask_num)
-    {
-    case 0:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXM0SID_OFFSET) = (mask_val.id.standard_id)<<5 | (1<<3) | (mask_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXM0EID_OFFSET) = (mask_val.id.extended_id&0x0FFFF);
-        break;
-    case 1:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXM1SID_OFFSET) = (mask_val.id.standard_id)<<5 | (1<<3) | (mask_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXM1EID_OFFSET) = (mask_val.id.extended_id&0x0FFFF);
-        break;
-    case 2:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXM2SID_OFFSET) = (mask_val.id.standard_id)<<5 | (1<<3) | (mask_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXM2EID_OFFSET) = (mask_val.id.extended_id&0x0FFFF);
-        break;
-    default:
-        // Return to buffer window
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiCTRL1_OFFSET) &= 0xFFFE;
-        return -1;
-    }
-
-    // Return to buffer window
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiCTRL1_OFFSET) &= 0xFFFE;
-    
-    return 0;
-}
-
-int can_set_filter(can_module_t *module, unsigned int filter_num, carlmessage_header_t filter_val, unsigned int mask_num)
-{
-    // Check for valid module
-    if( module == NULL )
-    {
-        return -1;
-    }
-
-    // Only modify filters if module is not readable or writable
-    //! @TODO Add module lock so the filter modification is atomic.
-    if( module->open_mode&READ == READ || module->open_mode&WRITE == WRITE )
-    {
-        return -1;
-    }
-
-    // Check for valid filter and mask numbers
-    if( filter_num > 15 || mask_num > 2 )
-    {
-        return -1;
-    }
-
-    //! The module should normally be in buffer window
-    // Set filter window
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiCTRL1_OFFSET) |= 0x0001;
-
-    switch(filter_num)
-    {
-    case 0:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF0SID_OFFSET) = (filter_val.id.standard_id)<<5 | (1<<3) | (filter_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF0EID_OFFSET) = (filter_val.id.extended_id&0x0FFFF);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL1_OFFSET) &= (0x0003);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL1_OFFSET) |= (mask_num);
-        break;
-    case 1:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF1SID_OFFSET) = (filter_val.id.standard_id)<<5 | (1<<3) | (filter_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF1EID_OFFSET) = (filter_val.id.extended_id&0x0FFFF);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL1_OFFSET) &= (0x0003<<2);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL1_OFFSET) |= (mask_num<<2);
-        break;
-    case 2:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF2SID_OFFSET) = (filter_val.id.standard_id)<<5 | (1<<3) | (filter_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF2EID_OFFSET) = (filter_val.id.extended_id&0x0FFFF);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL1_OFFSET) &= (0x0003<<4);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL1_OFFSET) |= (mask_num<<4);
-        break;
-    case 3:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF3SID_OFFSET) = (filter_val.id.standard_id)<<5 | (1<<3) | (filter_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF3EID_OFFSET) = (filter_val.id.extended_id&0x0FFFF);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL1_OFFSET) &= (0x0003<<6);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL1_OFFSET) |= (mask_num<<6);
-        break;
-    case 4:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF4SID_OFFSET) = (filter_val.id.standard_id)<<5 | (1<<3) | (filter_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF4EID_OFFSET) = (filter_val.id.extended_id&0x0FFFF);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL1_OFFSET) &= (0x0003<<8);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL1_OFFSET) |= (mask_num<<8);
-        break;
-    case 5:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF5SID_OFFSET) = (filter_val.id.standard_id)<<5 | (1<<3) | (filter_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF5EID_OFFSET) = (filter_val.id.extended_id&0x0FFFF);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL1_OFFSET) &= (0x0003<<10);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL1_OFFSET) |= (mask_num<<10);
-        break;
-    case 6:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF6SID_OFFSET) = (filter_val.id.standard_id)<<5 | (1<<3) | (filter_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF6EID_OFFSET) = (filter_val.id.extended_id&0x0FFFF);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL1_OFFSET) &= (0x0003<<12);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL1_OFFSET) |= (mask_num<<12);
-        break;
-    case 7:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF7SID_OFFSET) = (filter_val.id.standard_id)<<5 | (1<<3) | (filter_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF7EID_OFFSET) = (filter_val.id.extended_id&0x0FFFF);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL1_OFFSET) &= (0x0003<<14);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL1_OFFSET) |= (mask_num<<14);
-        break;
-    case 8:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF8SID_OFFSET) = (filter_val.id.standard_id)<<5 | (1<<3) | (filter_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF8EID_OFFSET) = (filter_val.id.extended_id&0x0FFFF);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL2_OFFSET) &= (0x0003);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL2_OFFSET) |= (mask_num);
-        break;
-    case 9:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF9SID_OFFSET) = (filter_val.id.standard_id)<<5 | (1<<3) | (filter_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF9EID_OFFSET) = (filter_val.id.extended_id&0x0FFFF);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL2_OFFSET) &= (0x0003<<2);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL2_OFFSET) |= (mask_num<<2);
-        break;
-    case 10:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF10SID_OFFSET) = (filter_val.id.standard_id)<<5 | (1<<3) | (filter_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF10EID_OFFSET) = (filter_val.id.extended_id&0x0FFFF);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL2_OFFSET) &= (0x0003<<4);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL2_OFFSET) |= (mask_num<<4);
-        break;
-    case 11:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF11SID_OFFSET) = (filter_val.id.standard_id)<<5 | (1<<3) | (filter_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF11EID_OFFSET) = (filter_val.id.extended_id&0x0FFFF);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL2_OFFSET) &= (0x0003<<6);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL2_OFFSET) |= (mask_num<<6);
-        break;
-    case 12:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF12SID_OFFSET) = (filter_val.id.standard_id)<<5 | (1<<3) | (filter_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF12EID_OFFSET) = (filter_val.id.extended_id&0x0FFFF);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL2_OFFSET) &= (0x0003<<8);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL2_OFFSET) |= (mask_num<<8);
-        break;
-    case 13:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF13SID_OFFSET) = (filter_val.id.standard_id)<<5 | (1<<3) | (filter_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF13EID_OFFSET) = (filter_val.id.extended_id&0x0FFFF);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL2_OFFSET) &= (0x0003<<10);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL2_OFFSET) |= (mask_num<<10);
-        break;
-    case 14:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF14SID_OFFSET) = (filter_val.id.standard_id)<<5 | (1<<3) | (filter_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF14EID_OFFSET) = (filter_val.id.extended_id&0x0FFFF);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL2_OFFSET) &= (0x0003<<12);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL2_OFFSET) |= (mask_num<<12);
-        break;
-    case 15:
-        // Always use extended id
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF15SID_OFFSET) = (filter_val.id.standard_id)<<5 | (1<<3) | (filter_val.id.extended_id)>>16;
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiRXF15EID_OFFSET) = (filter_val.id.extended_id&0x0FFFF);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL2_OFFSET) &= (0x0003<<14);
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiFMSKSEL2_OFFSET) |= (mask_num<<14);
-        break;
-    default:
-        // Switch to buffer window
-        *(module->can_base_address + CANBUS_SFR_OFFSET_CiCTRL1_OFFSET) &= 0xFFFE;
-        return -1;
-    }
-
-    // Switch to buffer window
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiCTRL1_OFFSET) &= 0xFFFE;
-    
-    return 0;
-}
-
-int can_enable_filter(can_module_t *module, unsigned int filter_num)
-{
-    // Check for valid module
-    if( module == NULL )
-    {
-        return -1;
-    }
-
-    // Check for valid filter number
-    if( filter_num > 15 )
-    {
-        return -1;
-    }
-
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiFEN1_OFFSET) |= (1<<filter_num);
-
-    return 0;
-}
-
-int can_disable_filter(can_module_t *module, unsigned int filter_num)
-{
-    // Check for valid module
-    if( module == NULL )
-    {
-        return -1;
-    }
-
-    // Check for valid filter number
-    if( filter_num > 15 )
-    {
-        return -1;
-    }
-
-    *(module->can_base_address + CANBUS_SFR_OFFSET_CiFEN1_OFFSET) &= ~(1<<filter_num);
-
-    return 0;
-}
-*/

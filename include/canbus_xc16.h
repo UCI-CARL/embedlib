@@ -209,43 +209,6 @@ enum canbus_attr_e
     CANBUS_MODULE_TIMESTAMP_EN  = 0x0001, /**< Enable timestamping on message receipt. Triggers
                                              Input Capture 2 (must be set up to capture). */
 
-    // FIFO start buffer
-    // 5-bits
-    // Note: Buffer 8 is the default start, so it has a value of 0x0000.
-    // Note: FIFO may not be disabled
-    CANBUS_FIFO_START_B8   = 0x0000, /**< Select buffer 8 as FIFO start. @default */
-    CANBUS_FIFO_START_B0   = 0x0001, /**< Select buffer 0 as FIFO start. */
-    CANBUS_FIFO_START_B1   = 0x0002, /**< Select buffer 1 as FIFO start. */
-    CANBUS_FIFO_START_B2   = 0x0003, /**< Select buffer 2 as FIFO start. */
-    CANBUS_FIFO_START_B3   = 0x0004, /**< Select buffer 3 as FIFO start. */
-    CANBUS_FIFO_START_B4   = 0x0005, /**< Select buffer 4 as FIFO start. */
-    CANBUS_FIFO_START_B5   = 0x0006, /**< Select buffer 5 as FIFO start. */
-    CANBUS_FIFO_START_B6   = 0x0007, /**< Select buffer 6 as FIFO start. */
-    CANBUS_FIFO_START_B7   = 0x0008, /**< Select buffer 7 as FIFO start. */
-    CANBUS_FIFO_START_B9   = 0x0009, /**< Select buffer 9 as FIFO start. */
-    CANBUS_FIFO_START_B10  = 0x000A, /**< Select buffer 10 as FIFO start. */
-    CANBUS_FIFO_START_B11  = 0x000B, /**< Select buffer 11 as FIFO start. */
-    CANBUS_FIFO_START_B12  = 0x000C, /**< Select buffer 12 as FIFO start. */
-    CANBUS_FIFO_START_B13  = 0x000D, /**< Select buffer 13 as FIFO start. */
-    CANBUS_FIFO_START_B14  = 0x000E, /**< Select buffer 14 as FIFO start. */
-    CANBUS_FIFO_START_B15  = 0x000F, /**< Select buffer 15 as FIFO start. */
-    CANBUS_FIFO_START_B16  = 0x0010, /**< Select buffer 16 as FIFO start. */
-    CANBUS_FIFO_START_B17  = 0x0011, /**< Select buffer 17 as FIFO start. */
-    CANBUS_FIFO_START_B18  = 0x0012, /**< Select buffer 18 as FIFO start. */
-    CANBUS_FIFO_START_B19  = 0x0013, /**< Select buffer 19 as FIFO start. */
-    CANBUS_FIFO_START_B20  = 0x0014, /**< Select buffer 20 as FIFO start. */
-    CANBUS_FIFO_START_B21  = 0x0015, /**< Select buffer 21 as FIFO start. */
-    CANBUS_FIFO_START_B22  = 0x0016, /**< Select buffer 22 as FIFO start. */
-    CANBUS_FIFO_START_B23  = 0x0017, /**< Select buffer 23 as FIFO start. */
-    CANBUS_FIFO_START_B24  = 0x0018, /**< Select buffer 24 as FIFO start. */
-    CANBUS_FIFO_START_B25  = 0x0019, /**< Select buffer 25 as FIFO start. */
-    CANBUS_FIFO_START_B26  = 0x001A, /**< Select buffer 26 as FIFO start. */
-    CANBUS_FIFO_START_B27  = 0x001B, /**< Select buffer 27 as FIFO start. */
-    CANBUS_FIFO_START_B28  = 0x001C, /**< Select buffer 28 as FIFO start. */
-    CANBUS_FIFO_START_B29  = 0x001D, /**< Select buffer 29 as FIFO start. */
-    CANBUS_FIFO_START_B30  = 0x001E, /**< Select buffer 30 as FIFO start. */
-    CANBUS_FIFO_START_B31  = 0x001F, /**< Select buffer 31 as FIFO start. */
-
     // FIFO length
     // 3-bits
     // Note: Length 24 is the default, so it has a value of 0x0000.
@@ -477,20 +440,12 @@ typedef enum canbus_error_e
 struct canbus_header_s
 {
     // Disabled since, currently, a filter may not point at a TX buffer.
-    //int auto_tx :1; /**< Automatically transmit the message when an RTR message is received. */
-    
-    int sid :11; /**< The standard ID of a message (11-bits). */
-    int rtr :1;  /**< The remote transmit request (RTR) bit. */
-    int ide :1;  /**< The extended ID enable bit. */
-    union
-    {
-        long eid :18; /**< The extend ID of a message (18-bits). */
-        struct
-        {
-            int eid_l :16;
-            int eid_h :2;
-        };
-    };
+    //long auto_tx :1; /**< Automatically transmit the message when an RTR message is received. */
+    unsigned long rtr :1;  /**< The remote transmit request (RTR) bit. */
+    unsigned long ide :1;  /**< The extended ID enable bit. */
+
+    unsigned long sid :11; /**< The standard ID of a message (11-bits). */
+    unsigned long eid :18; /**< The ID of a message (up to 29-bits). */
 };
 typedef struct canbus_header_s canbus_header_t;
 
@@ -534,38 +489,43 @@ typedef struct canbus_message_s canbus_message_t;
  *
  * @public
  */
-struct canbus_attr_s {
+struct canbus_attr_s
+{
 
-    struct {
-        int pre             :6;
-        int sync_jump       :2;
-        int prop_seg        :3;
-        int phase_seg1      :3;
-        int phase_seg2      :3;
-        int phase_seg2_prog :1;
-        int sample          :1;
+    struct
+    {
+        unsigned int pre             :6;
+        unsigned int sync_jump       :2;
+        unsigned int prop_seg        :3;
+        unsigned int phase_seg1      :3;
+        unsigned int phase_seg2      :3;
+        unsigned int phase_seg2_prog :1;
+        unsigned int sample          :1;
     } bit_timing;
 
-    struct {
-        int wakeup    :1;
-        int cpuidle   :1;
-        int timestamp :1;
+    struct
+    {
+        unsigned int wakeup    :1;
+        unsigned int cpuidle   :1;
+        unsigned int timestamp :1;
     } module;
 
-    struct {
-        int start  :5;
-        int length :3;
+    struct
+    {
+        unsigned int start  :5;
+        unsigned int length :3;
     } fifo;
 
-    struct {
-        int b0 :1;
-        int b1 :1;
-        int b2 :1;
-        int b3 :1;
-        int b4 :1;
-        int b5 :1;
-        int b6 :1;
-        int b7 :1;
+    struct
+    {
+        unsigned int b0 :1;
+        unsigned int b1 :1;
+        unsigned int b2 :1;
+        unsigned int b3 :1;
+        unsigned int b4 :1;
+        unsigned int b5 :1;
+        unsigned int b6 :1;
+        unsigned int b7 :1;
     } buffer_dir;
 };
 typedef struct canbus_attr_s canbus_attr_t;
@@ -658,7 +618,7 @@ struct canbus_global_s
                        unsigned int tx_dma_channel,
                        unsigned int rx_dma_channel,
                        volatile unsigned int dma_buffer[][8],
-                       unsigned int dma_buffer_length);
+                       unsigned int num_buffers);
     
     /**
      * @brief Set the mode of the CAN bus hardware.
