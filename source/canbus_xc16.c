@@ -3279,7 +3279,10 @@ static int canbus_peek(canbus_t *object,
                        canbus_message_t *message)
 {
 #ifdef DEBUG__
-    canbus_private_t *debug_private = (canbus_private_t *)(object->private);
+    canbus_private_t *debug_private;
+    unsigned int debug_value;
+    debug_private = (canbus_private_t *)(object->private);
+    debug_value = 0;
 #endif
 
     unsigned int i;
@@ -3329,8 +3332,8 @@ static int canbus_peek(canbus_t *object,
     {// Read from the FIFO buffer
         // Read from the buffer specified by CiFIFO.FNRB (i.e. next read buffer)
         buffer_ptr = ((canbus_private_t *)(object->private))->rx_dma_->buffer_a + \
-            (((canbus_cififo_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFIFO)) \
-             ->fnrb) * 8;
+            ((((canbus_cififo_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiFIFO)) \
+             ->fnrb) * 8);
     }
     else
     {// Read from a normal buffer
@@ -3636,7 +3639,12 @@ static bool canbus_buffer_exists(canbus_t *object,
         
     case CANBUS_BUFFER_B31:
         return ((canbus_private_t *)(object->private))->buffer_exists_.b31_exists;
-        
+
+    case CANBUS_BUFFER_FIFO:
+        return true;
+
+    case CANBUS_BUFFER_NONE:
+    case CANBUS_BUFFER_ALL:
     default:
         // Invalid input
         return false;
