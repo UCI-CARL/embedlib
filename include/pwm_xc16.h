@@ -206,6 +206,9 @@ struct pwm_global_s
     int (* const write_dutycycle)(pwm_t *module, pwm_channel_t channel, unsigned int dutycycle);
     unsigned int (* const read_dutycycle)(pwm_t *module, pwm_channel_t channel);
     int (* const override_output)(pwm_t *module, pwm_pin_t pin, pwm_output_t value);
+    bool (* const is_valid)(pwm_t *module);
+    bool (* const is_running)(pwm_t *module);
+    int (* const cleanup)(pwm_t *module);
 };
 typedef struct pwm_global_s pwm_global_t;
 
