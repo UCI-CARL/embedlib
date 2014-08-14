@@ -36,14 +36,14 @@
 enum pwm_pin_e
 {
     PWM_PIN_NONE = 0x0000,
-    PWM_PIN_P1H  = 0x0001,
-    PWM_PIN_P1L  = 0x0002,
-    PWM_PIN_P2H  = 0x0003,
-    PWM_PIN_P2L  = 0x0004,
-    PWM_PIN_P3H  = 0x0005,
-    PWM_PIN_P3L  = 0x0006,
-    PWM_PIN_P4H  = 0x0007,
-    PWM_PIN_P4L  = 0x0008,
+    PWM_PIN_P1L  = 0x0001,
+    PWM_PIN_P1H  = 0x0002,
+    PWM_PIN_P2L  = 0x0003,
+    PWM_PIN_P2H  = 0x0004,
+    PWM_PIN_P3L  = 0x0005,
+    PWM_PIN_P3H  = 0x0006,
+    PWM_PIN_P4L  = 0x0007,
+    PWM_PIN_P4H  = 0x0008,
     PWM_PIN_ALL  = 0x000F
 };
 typedef enum pwm_pin_e pwm_pin_t;
@@ -133,6 +133,25 @@ enum pwm_attr_module_e
 };
 
 /**
+ * @brief Constants defining the valid errors that can be returned by module functions.
+ *
+ * @details Nothing here.
+ *
+ * @public
+ */
+enum pwm_error_e
+{
+    PWM_E_NONE = 0,
+    PWM_E_MODULE = -1,
+    PWM_E_INPUT = -2,
+    PWM_E_ALLOC = -3,
+    PWM_E_UNSUPPORTED = -4,
+
+    PWM_E_ASSERT = 0x8000
+};
+typedef enum pwm_error_e pwm_error_t;
+
+/**
  * @brief The attribute object contains all the static settings for a PWM module.
  *
  * @details Nothing here.
@@ -150,7 +169,7 @@ struct pwm_attr_s
     {
         unsigned int prescaler  :2;
         unsigned int postscaler :4;
-        unsigned int period;
+        unsigned int period :15;
     } time_base;
 
     /**
@@ -181,7 +200,7 @@ typedef struct pwm_s pwm_t;
  */
 struct pwm_s
 {
-    const unsigned int module_number;
+    const unsigned int module_number; // Must be 1 or 2
 
     void (* notify)(pwm_t *module);
 
