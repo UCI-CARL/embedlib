@@ -26,6 +26,7 @@
 #ifndef PWM_XC16_H_
 #define PWM_XC16_H_
 
+#include <stdbool.h>
 /**
  * @brief Constants defining the valid PWM module pins.
  *

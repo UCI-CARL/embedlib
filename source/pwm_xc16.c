@@ -30,6 +30,7 @@
 #include <xc.h>
 
 // Include local libraries
+#include <pwm_hw.h>
 #include <pwm.h>
 
 #define PWM_BASE_ADDRESS(module) ( ((pwm_private_t *)((module)->private))->base_address_ )
@@ -69,9 +70,9 @@ enum pwm_sfr_default_e
     PWM_SFR_DEFAULT_PWMxCON2  = 0x0000,
     PWM_SFR_DEFAULT_PxDTCON1  = 0x0000,
     PWM_SFR_DEFAULT_PxDTCON2  = 0x0000,
-    PWM_SFR_DEFAULT_PxFLTACON = 0x000F, /**< The last 4 bits of this default depend on the hardware
+    PWM_SFR_DEFAULT_PxFLTACON = 0x0000, /**< The last 4 bits of this default depend on the hardware
                                            in use. They are set to 1's here for simplicity. */
-    PWM_SFR_DEFAULT_PxFLTBCON = 0x000F, /**< The last 4 bits of this default depend on the hardware
+    PWM_SFR_DEFAULT_PxFLTBCON = 0x0000, /**< The last 4 bits of this default depend on the hardware
                                            in use. They are set to 1's here for simplicity. */
     PWM_SFR_DEFAULT_PxOVDCON  = 0xFF00,
     PWM_SFR_DEFAULT_PxDC1     = 0x0000,
@@ -231,7 +232,7 @@ typedef struct pwm_pxovdcon_bits_s pwm_pxovdcon_bits_t;
 struct pwm_private_s
 {
     pwm_attr_t attr_;
-    volatile unsigned int base_address_;
+    volatile unsigned int *base_address_;
 };
 typedef struct pwm_private_s pwm_private_t;
 
@@ -307,7 +308,7 @@ static int pwm_init(pwm_t *module,
         // Set base address
         ((pwm_private_t *)(module->private))->base_address_ = &P1TCON;
     }
-#if PWM_HW_MAX_MODULE_NUM == 2
+#if PWM_HW_NUMBER_OF_MODULES == 2
     else if( module->module_number == 2 )
     {// MCPWM2
         // Set base address
@@ -325,19 +326,25 @@ static int pwm_init(pwm_t *module,
     *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxTMR) = PWM_SFR_DEFAULT_PxTMR;
     *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxTPER) = PWM_SFR_DEFAULT_PxTPER;
     *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxSECMP) = PWM_SFR_DEFAULT_PxSECMP;
+#ifdef PWM_HW_LOCKED
     PWM_UNLOCK(module);
+#endif
     *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1) = PWM_SFR_DEFAULT_PWMxCON1;
     *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON2) = PWM_SFR_DEFAULT_PWMxCON2;
     *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxDTCON1) = PWM_SFR_DEFAULT_PxDTCON1;
     *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxDTCON2) = PWM_SFR_DEFAULT_PxDTCON2;
+#ifdef PWM_HW_LOCKED
     PWM_UNLOCK(module);
+#endif
     *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxFLTACON) = PWM_SFR_DEFAULT_PxFLTACON;
     *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) = PWM_SFR_DEFAULT_PxOVDCON;
     *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxDC1) = PWM_SFR_DEFAULT_PxDC1;
     // Only MCPWM1 has these SFRs
     if( module->module_number == 1 )
     {
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
+#endif
         *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxFLTBCON) = PWM_SFR_DEFAULT_PxFLTBCON;
         *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxDC2) = PWM_SFR_DEFAULT_PxDC2;
         *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxDC3) = PWM_SFR_DEFAULT_PxDC3;
@@ -511,74 +518,106 @@ static int pwm_enable_pin(pwm_t *module,
     // Check for case of ALL first so it takes precedence over module number
     if( pin == PWM_PIN_ALL )
     {// Enable all pins
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
-        ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen1l = 1;
+#endif
+        ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen1l = 1;
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
-        ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen1h = 1;
+#endif
+        ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen1h = 1;
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
-        ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen2l = 1;
+#endif
+        ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen2l = 1;
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
-        ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen2h = 1;
+#endif
+        ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen2h = 1;
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
-        ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen3l = 1;
+#endif
+        ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen3l = 1;
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
-        ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen3h = 1;
+#endif
+        ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen3h = 1;
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
-        ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen4l = 1;
+#endif
+        ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen4l = 1;
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
+#endif
         ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen4h = 1;
     }
     else if( pin == PWM_PIN_P1L )
     {
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
+#endif
         ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen1l = 1;
     }
     else if( pin == PWM_PIN_P1H )
     {
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
+#endif
         ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen1h = 1;
     }
     else if( module->module_number == 1 )
     {// Only MCPWM1 has 4 channels
         if( pin == PWM_PIN_P2L )
         {
+#ifdef PWM_HW_LOCKED
             PWM_UNLOCK(module);
+#endif
             ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1)) \
                 ->pen2l = 1;
         }
         else if( pin == PWM_PIN_P2H )
         {
+#ifdef PWM_HW_LOCKED
             PWM_UNLOCK(module);
+#endif
             ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1)) \
                 ->pen2h = 1;
         }
         else if( pin == PWM_PIN_P3L )
         {
+#ifdef PWM_HW_LOCKED
             PWM_UNLOCK(module);
+#endif
             ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1)) \
                 ->pen3l = 1;
         }
         else if( pin == PWM_PIN_P3H )
         {
+#ifdef PWM_HW_LOCKED
             PWM_UNLOCK(module);
+#endif
             ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1)) \
                 ->pen3h = 1;
         }
         else if( pin == PWM_PIN_P4L )
         {
+#ifdef PWM_HW_LOCKED
             PWM_UNLOCK(module);
+#endif
             ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1)) \
                 ->pen4l = 1;
         }
         else if( pin == PWM_PIN_P4H )
         {
+#ifdef PWM_HW_LOCKED
             PWM_UNLOCK(module);
+#endif
             ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1)) \
                 ->pen4h = 1;
         }
         else
         {// Invalid pin number
-            return PWN_E_INPUT;
+            return PWM_E_INPUT;
         }
     }
     else
@@ -586,7 +625,7 @@ static int pwm_enable_pin(pwm_t *module,
         return PWM_E_INPUT;
     }
 
-    return PWN_E_NONE;
+    return PWM_E_NONE;
 }
 
 static int pwm_disable_pin(pwm_t *module,
@@ -608,74 +647,108 @@ static int pwm_disable_pin(pwm_t *module,
     // Check for case of ALL first so it takes precedence over module number
     if( pin == PWM_PIN_ALL )
     {// Enable all pins
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
-        ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen1l = 0;
+#endif
+        ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen1l = 0;
+#ifdef PWM_HW_LOCKED
+    #ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
-        ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen1h = 0;
+    #endif
+#endif
+        ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen1h = 0;
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
-        ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen2l = 0;
+#endif
+        ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen2l = 0;
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
-        ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen2h = 0;
+#endif
+        ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen2h = 0;
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
-        ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen3l = 0;
+#endif
+        ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen3l = 0;
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
-        ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen3h = 0;
+#endif
+        ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen3h = 0;
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
-        ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen4l = 0;
+#endif
+        ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen4l = 0;
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
-        ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen4h = 0;
+#endif
+        ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen4h = 0;
     }
     else if( pin == PWM_PIN_P1L )
     {
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
-        ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen1l = 0;
+#endif
+        ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen1l = 0;
     }
     else if( pin == PWM_PIN_P1H )
     {
+#ifdef PWM_HW_LOCKED
         PWM_UNLOCK(module);
-        ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen1h = 0;
+#endif
+        ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1))->pen1h = 0;
     }
     else if( module->module_number == 1 )
     {// Only MCPWM1 has 4 channels
         if( pin == PWM_PIN_P2L )
         {
+#ifdef PWM_HW_LOCKED
             PWM_UNLOCK(module);
-            ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1)) \
+#endif
+            ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1)) \
                 ->pen2l = 0;
         }
         else if( pin == PWM_PIN_P2H )
         {
+#ifdef PWM_HW_LOCKED
             PWM_UNLOCK(module);
-            ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1)) \
+#endif
+            ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1)) \
                 ->pen2h = 0;
         }
         else if( pin == PWM_PIN_P3L )
         {
+#ifdef PWM_HW_LOCKED
             PWM_UNLOCK(module);
-            ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1)) \
+#endif
+            ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1)) \
                 ->pen3l = 0;
         }
         else if( pin == PWM_PIN_P3H )
         {
+#ifdef PWM_HW_LOCKED
             PWM_UNLOCK(module);
-            ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1)) \
+#endif
+            ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1)) \
                 ->pen3h = 0;
         }
         else if( pin == PWM_PIN_P4L )
         {
+#ifdef PWM_HW_LOCKED
             PWM_UNLOCK(module);
-            ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1)) \
+#endif
+            ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1)) \
                 ->pen4l = 0;
         }
         else if( pin == PWM_PIN_P4H )
         {
+#ifdef PWM_HW_LOCKED
             PWM_UNLOCK(module);
-            ((pwm_pwmxcon1_bits_t *)(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1)) \
+#endif
+            ((pwm_pwmxcon1_bits_t *) (PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1)) \
                 ->pen4h = 0;
         }
         else
         {// Invalid pin number
-            return PWN_E_INPUT;
+            return PWM_E_INPUT;
         }
     }
     else
@@ -683,7 +756,7 @@ static int pwm_disable_pin(pwm_t *module,
         return PWM_E_INPUT;
     }
 
-    return PWN_E_NONE;
+    return PWM_E_NONE;
 }
 
 static int pwm_write_dutycycle(pwm_t *module,
@@ -869,7 +942,7 @@ static int pwm_override_output(pwm_t *module,
             }
             else
             {// Unknown value given
-                return PWN_E_INPUT;
+                return PWM_E_INPUT;
             }
         }
         else if( pin == PWM_PIN_P1L )
@@ -881,7 +954,7 @@ static int pwm_override_output(pwm_t *module,
             else if( value == PWM_OUTPUT_OVERRIDE_ACTIVE )
             {// Override pin P1L to active
                 *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) \
-                    = *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) | 1<<0 & ~(1<<8);
+                    = (*(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) | 1<<0) & ~(1<<8);
             }
             else if( value == PWM_OUTPUT_OVERRIDE_INACTIVE )
             {// Override pin P1L to inactive
@@ -902,7 +975,7 @@ static int pwm_override_output(pwm_t *module,
             else if( value == PWM_OUTPUT_OVERRIDE_ACTIVE )
             {// Override pin P1H to active
                 *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) \
-                    = *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) | 1<<1 & ~(1<<9);
+                    = (*(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) | 1<<1) & ~(1<<9);
             }
             else if( value == PWM_OUTPUT_OVERRIDE_INACTIVE )
             {// Override pin P1H to inactive
@@ -923,7 +996,7 @@ static int pwm_override_output(pwm_t *module,
             else if( value == PWM_OUTPUT_OVERRIDE_ACTIVE )
             {// Override pin P2L to active
                 *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) \
-                    = *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) | 1<<2 & ~(1<<10);
+                    = (*(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) | 1<<2) & ~(1<<10);
             }
             else if( value == PWM_OUTPUT_OVERRIDE_INACTIVE )
             {// Override pin P2L to inactive
@@ -944,7 +1017,7 @@ static int pwm_override_output(pwm_t *module,
             else if( value == PWM_OUTPUT_OVERRIDE_ACTIVE )
             {// Override pin P2H to active
                 *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) \
-                    = *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) | 1<<3 & ~(1<<11);
+                    = (*(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) | 1<<3) & ~(1<<11);
             }
             else if( value == PWM_OUTPUT_OVERRIDE_INACTIVE )
             {// Override pin P2H to inactive
@@ -965,7 +1038,7 @@ static int pwm_override_output(pwm_t *module,
             else if( value == PWM_OUTPUT_OVERRIDE_ACTIVE )
             {// Override pin P3L to active
                 *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) \
-                    = *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) | 1<<4 & ~(1<<12);
+                    = (*(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) | 1<<4) & ~(1<<12);
             }
             else if( value == PWM_OUTPUT_OVERRIDE_INACTIVE )
             {// Override pin P3L to inactive
@@ -986,7 +1059,7 @@ static int pwm_override_output(pwm_t *module,
             else if( value == PWM_OUTPUT_OVERRIDE_ACTIVE )
             {// Override pin P3H to active
                 *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) \
-                    = *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) | 1<<5 & ~(1<<13);
+                    = (*(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) | 1<<5) & ~(1<<13);
             }
             else if( value == PWM_OUTPUT_OVERRIDE_INACTIVE )
             {// Override pin P3H to inactive
@@ -1007,7 +1080,7 @@ static int pwm_override_output(pwm_t *module,
             else if( value == PWM_OUTPUT_OVERRIDE_ACTIVE )
             {// Override pin P4L to active
                 *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) \
-                    = *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) | 1<<6 & ~(1<<14);
+                    = (*(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) | 1<<6) & ~(1<<14);
             }
             else if( value == PWM_OUTPUT_OVERRIDE_INACTIVE )
             {// Override pin P4L to inactive
@@ -1028,7 +1101,7 @@ static int pwm_override_output(pwm_t *module,
             else if( value == PWM_OUTPUT_OVERRIDE_ACTIVE )
             {// Override pin P4H to active
                 *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) \
-                    = *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) | 1<<7 & ~(1<<15);
+                    = (*(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) | 1<<7) & ~(1<<15);
             }
             else if( value == PWM_OUTPUT_OVERRIDE_INACTIVE )
             {// Override pin P4H to inactive
@@ -1044,8 +1117,82 @@ static int pwm_override_output(pwm_t *module,
         {// Unknown pin given
             return PWM_E_INPUT;
         }
+    }
+    else if( module->module_number == 2 )
+    {// MCPWM2
+        // Set specified pin(s) to specified output
+        if( pin == PWM_PIN_ALL )
+        {// Set all pins to value
+            if( value == PWM_OUTPUT_OVERRIDE_DISABLE )
+            {// Disable override for all pins
+                *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) |= 0xFF00;
+            }
+            else if( value == PWM_OUTPUT_OVERRIDE_ACTIVE )
+            {// Override all pins to active
+                *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) = 0x00FF;
+            }
+            else if( value == PWM_OUTPUT_OVERRIDE_INACTIVE )
+            {// Override all pins to inactive
+                *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) = 0x0000;
+            }
+            else
+            {// Unknown value given
+                return PWM_E_INPUT;
+            }
+        }
+        else if( pin == PWM_PIN_P1L )
+        {// Set pin P1L to value
+            if( value == PWM_OUTPUT_OVERRIDE_DISABLE )
+            {// Disable override for pin P1L
+                *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) |= 0x0100;
+            }
+            else if( value == PWM_OUTPUT_OVERRIDE_ACTIVE )
+            {// Override pin P1L to active
+                *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) \
+                    = (*(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) | 1<<0) & ~(1<<8);
+            }
+            else if( value == PWM_OUTPUT_OVERRIDE_INACTIVE )
+            {// Override pin P1L to inactive
+                *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) \
+                    = *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) & ~(1<<0) & ~(1<<8);
+            }
+            else
+            {// Unknown value given
+                return PWM_E_INPUT;
+            }
+        }
+        else if( pin == PWM_PIN_P1H )
+        {// Set pin P1H to value
+            if( value == PWM_OUTPUT_OVERRIDE_DISABLE )
+            {// Disable override for pin P1H
+                *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) |= 0x0200;
+            }
+            else if( value == PWM_OUTPUT_OVERRIDE_ACTIVE )
+            {// Override pin P1H to active
+                *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) \
+                    = (*(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) | 1<<1) & ~(1<<9);
+            }
+            else if( value == PWM_OUTPUT_OVERRIDE_INACTIVE )
+            {// Override pin P1H to inactive
+                *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) \
+                    = *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) & ~(1<<1) & ~(1<<9);
+            }
+            else
+            {// Unknown value given
+                return PWM_E_INPUT;
+            }
+        }
+        else
+        {// Unknown pin given
+            return PWM_E_INPUT;
+        }
+    }
+    else
+    {// Unknown module number, should have been checked by is_valid()!
+        return PWM_E_ASSERT;
+    }
 
-        return PWM_E_NONE;
+    return PWM_E_NONE;
 }
 
 static bool pwm_is_valid(pwm_t *module)
@@ -1088,23 +1235,29 @@ static int pwm_cleanup(pwm_t *module)
                 // Reset all SFRs to default values
                 *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxTCON) = PWM_SFR_DEFAULT_PxTCON;
                 *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxTMR) = PWM_SFR_DEFAULT_PxTMR;
-                *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxTPER) = PWM_SFR_DEFAULT_PxTPER;
-                *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxSECMP) = PWM_SFR_DEFAULT_PxSECMP;
-                PWM_UNLOCK(module);
-                *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1) = PWM_SFR_DEFAULT_PWMxCON1;
-                *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON2) = PWM_SFR_DEFAULT_PWMxCON2;
-                *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxDTCON1) = PWM_SFR_DEFAULT_PxDTCON1;
-                *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxDTCON2) = PWM_SFR_DEFAULT_PxDTCON2;
-                PWM_UNLOCK(module);
-                *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxFLTACON) = PWM_SFR_DEFAULT_PxFLTACON;
-                *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) = PWM_SFR_DEFAULT_PxOVDCON;
-                *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxDC1) = PWM_SFR_DEFAULT_PxDC1;
-                // Only MCPWM1 has these SFRs
-                if( module->module_number == 1 )
-                {
+                    *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxTPER) = PWM_SFR_DEFAULT_PxTPER;
+                    *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxSECMP) = PWM_SFR_DEFAULT_PxSECMP;
+#ifdef PWM_HW_LOCKED
                     PWM_UNLOCK(module);
-                    *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxFLTBCON) = PWM_SFR_DEFAULT_PxFLTBCON;
-                    *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxDC2) = PWM_SFR_DEFAULT_PxDC2;
+#endif
+                    *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON1) = PWM_SFR_DEFAULT_PWMxCON1;
+                    *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PWMxCON2) = PWM_SFR_DEFAULT_PWMxCON2;
+                    *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxDTCON1) = PWM_SFR_DEFAULT_PxDTCON1;
+                    *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxDTCON2) = PWM_SFR_DEFAULT_PxDTCON2;
+#ifdef PWM_HW_LOCKED
+                    PWM_UNLOCK(module);
+#endif
+                    *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxFLTACON) = PWM_SFR_DEFAULT_PxFLTACON;
+                    *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxOVDCON) = PWM_SFR_DEFAULT_PxOVDCON;
+                    *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxDC1) = PWM_SFR_DEFAULT_PxDC1;
+                    // Only MCPWM1 has these SFRs
+                    if( module->module_number == 1 )
+                    {
+#ifdef PWM_HW_LOCKED
+                        PWM_UNLOCK(module);
+#endif
+                        *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxFLTBCON) = PWM_SFR_DEFAULT_PxFLTBCON;
+                        *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxDC2) = PWM_SFR_DEFAULT_PxDC2;
                     *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxDC3) = PWM_SFR_DEFAULT_PxDC3;
                     *(PWM_BASE_ADDRESS(module) + PWM_SFR_OFFSET_PxDC4) = PWM_SFR_DEFAULT_PxDC4;
                 }
