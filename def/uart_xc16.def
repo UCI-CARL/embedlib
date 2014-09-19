@@ -1,0 +1,23 @@
+/* -*- mode: C; tab-width: 4; -*- */
+/**
+ * @file uart_xc16.def
+ *
+ * @brief This definition file is a template which contains all the optional modes and settings
+ * of a UART Module for the XC16 compiler/hardware.
+ *
+ * @author      Liam Bucci
+ * @date        5/21/2014
+ * @carlnumber  FIRM-0009
+ * @version     0.4.0
+ */
+
+// Include guard
+#ifndef _UART_DEF_H
+#define _UART_DEF_H
+
+// Set the baud rate manually
+//#define UART_DEF_MANUAL_BAUDRATE
+//#define UART_DEF_SET_BRGH
+//#define UART_DEF_BRG 0xFFFF
+
+#endif //_UART_DEF_H
