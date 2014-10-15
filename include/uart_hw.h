@@ -30,6 +30,10 @@
 #define UART_HW_NUMBER_OF_MODULES 2 /**< Number of UART hardware modules on this chip. */
 #endif
 
+#if defined(__PIC24EP512GU810__)
+#define UART_HW_NUMBER_OF_MODULES 4 /**< Number of UART hardware modules on this chip. */
+#endif
+
 /* Set Base Addresses */
 
 #define UART_HW_BASE_ADDRESS_UART1 &U1MODE /**< Base address for UART 1 */

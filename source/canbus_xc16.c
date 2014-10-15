@@ -1145,7 +1145,6 @@ from 1 to 2."
     {
         ((canbus_cictrl1_bits_t *)(CANBUS_BASE_ADDRESS(object) + CANBUS_SFR_OFFSET_CiCTRL1)) \
             ->cancap = 1;
-        debug_value = ((canbus_private_t *)(object->private))->attr_.module.timestamp;
     }
 
     

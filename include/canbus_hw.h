@@ -30,6 +30,10 @@
 #define CANBUS_HW_NUMBER_OF_MODULES 1 /**< Number of CAN bus hardware modules on this chip. */
 #endif
 
+#if defined(__PIC24EP512GU810__)
+#define CANBUS_HW_NUMBER_OF_MODULES 2 /**< Number of CAN bus hardware modules on this chip. */
+#endif
+
 /* Set Base Addresses */
 
 #define CANBUS_HW_BASE_ADDRESS_C1 &C1CTRL1 /**< Base address for C1 */

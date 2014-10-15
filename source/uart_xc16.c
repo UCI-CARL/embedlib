@@ -2243,12 +2243,6 @@ inline bool uart_is_valid(uart_module_t *module)
 {
     return ( module == NULL \
              || module->uart_number > (UART_HW_NUMBER_OF_MODULES-1) \
-             || module->write == NULL \
-             || module->read == NULL \
-             || module->flush_tx == NULL \
-             || module->flush_rx == NULL \
-             || module->tx_isr == NULL \
-             || module->rx_isr == NULL \
              || module->private == NULL ) ? false : true;
 }
 

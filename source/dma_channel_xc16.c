@@ -28,7 +28,7 @@
 #include <bitops.h>
 
 // Microchip peripheral libraries
-#include <p33Fxxxx.h>
+#include <xc.h>
 
 // Hardware specific module include file
 #include <dma_hw.h>

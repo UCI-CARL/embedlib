@@ -624,7 +624,8 @@ int uart_flush(uart_module_t *module,
  * @brief The TX interrupt service routine (ISR) for a UART module.
  *
  * @details This function should be inserted into the appropriate ISR for the given UART module.
- * The function will take care of writing any 
+ */
+
 
 // Blocking?
 int uart_close(uart_module_t *module,
